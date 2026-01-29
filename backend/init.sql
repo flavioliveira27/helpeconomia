@@ -4,9 +4,9 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
-CREATE DATABASE IF NOT EXISTS finansmart CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS helpeconomia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE finansmart;
+USE helpeconomia;
 
 -- Tabela de Usuários
 CREATE TABLE IF NOT EXISTS users (

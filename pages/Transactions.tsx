@@ -3,6 +3,7 @@ import { TransactionBlock } from '../components/spreadsheet/TransactionBlock';
 import { TransactionType } from '../types';
 import { useFinancial } from '../contexts/FinancialContext';
 import { MonthSelector } from '../components/ui/MonthSelector';
+import { HeaderActions } from '../components/ui/HeaderActions';
 
 export const Transactions: React.FC = () => {
   const { selectedMonth, selectedYear, setSelectedMonth } = useFinancial();
@@ -21,11 +22,14 @@ export const Transactions: React.FC = () => {
             Gerenciando lançamentos de <span className="font-bold text-primary">{months[selectedMonth]}</span> de {selectedYear}
           </p>
         </div>
-        <MonthSelector
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
-          onMonthChange={setSelectedMonth}
-        />
+        <div className="flex items-center gap-3">
+          <HeaderActions />
+          <MonthSelector
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onMonthChange={setSelectedMonth}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
