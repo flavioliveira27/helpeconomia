@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { DashboardCharts } from '../components/charts/DashboardCharts';
 import { useFinancial } from '../contexts/FinancialContext';
 import { MonthSelector } from '../components/ui/MonthSelector';
+import { HeaderActions } from '../components/ui/HeaderActions';
 import { Printer, ChevronDown, ChevronUp } from 'lucide-react';
 import { TransactionType, TransactionPaymentMethod, TransactionImportance } from '../types';
 
@@ -76,6 +77,7 @@ export const Reports: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <HeaderActions />
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-medium text-sm shadow-sm"

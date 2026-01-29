@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { generateFinancialInsights } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 import { MonthSelector } from '../components/ui/MonthSelector';
+import { HeaderActions } from '../components/ui/HeaderActions';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 export const Dashboard: React.FC = () => {
@@ -117,11 +118,14 @@ export const Dashboard: React.FC = () => {
             Resumo de <span className="font-bold text-primary">{months[selectedMonth]}</span> de {selectedYear}
           </p>
         </div>
-        <MonthSelector
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
-          onMonthChange={setSelectedMonth}
-        />
+        <div className="flex items-center gap-3">
+          <HeaderActions />
+          <MonthSelector
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onMonthChange={setSelectedMonth}
+          />
+        </div>
       </header>
 
       {/* AI Section */}

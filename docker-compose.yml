@@ -4,7 +4,7 @@ services:
     container_name: finansmart_mysql
     environment:
       MYSQL_ROOT_PASSWORD: Castr0@2715
-      MYSQL_DATABASE: finansmart
+      MYSQL_DATABASE: helpeconomia
       MYSQL_USER: finansmart_user
       MYSQL_PASSWORD: finansmart_pass_2024
       MYSQL_CHARSET: utf8mb4
@@ -12,7 +12,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./backend/my.cnf:/etc/mysql/conf.d/my.cnf
     networks:
@@ -31,7 +31,7 @@ services:
       DB_HOST: mysql
       DB_USER: finansmart_user
       DB_PASSWORD: finansmart_pass_2024
-      DB_NAME: finansmart
+      DB_NAME: helpeconomia
       DB_PORT: 3306
       JWT_SECRET: finansmart_secret_key_2024_super_secure
       PORT: 5000
@@ -61,7 +61,7 @@ services:
       - finansmart_network
 
 volumes:
-  mysql_data:
+
   backend_node_modules:
 
 

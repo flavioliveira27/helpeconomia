@@ -20,7 +20,7 @@ git commit -m "Primeiro commit do sistema"
 git branch -M main
 
 # 4. Crie a branch de desenvolvimento
-git checkout -b develop
+git checkout -b desenvolvimento
 ```
 
 ## 2. Conectando com GitHub/GitLab
@@ -32,17 +32,17 @@ git checkout -b develop
 ```bash
 git remote add origin SUA_URL_DO_REPO
 git push -u origin main
-git push -u origin develop
+git push -u origin desenvolvimento
 ```
 
 ## 3. Fluxo de Trabalho Diário (Development)
 
-Sempre trabalhe na branch `develop`. **Nunca** faça commits diretos na `main`.
+Sempre trabalhe na branch `desenvolvimento`. **Nunca** faça commits diretos na `main`.
 
-1. **Antes de começar**, garanta que está na develop e atualizado:
+1. **Antes de começar**, garanta que está na desenvolvimento e atualizado:
    ```bash
-   git checkout develop
-   git pull origin develop
+   git checkout desenvolvimento
+   git pull origin desenvolvimento
    ```
 
 2. **Faça suas alterações** no código.
@@ -55,12 +55,12 @@ Sempre trabalhe na branch `develop`. **Nunca** faça commits diretos na `main`.
 
 4. **Envie para o repositório online**:
    ```bash
-   git push origin develop
+   git push origin desenvolvimento
    ```
 
 ## 4. Subindo Novas Versões (Deploy/Release)
 
-Quando o código na `develop` estiver testado e pronto para ir ao ar (produção), você fará o merge para a `main`.
+Quando o código na `desenvolvimento` estiver testado e pronto para ir ao ar (produção), você fará o merge para a `main`.
 
 1. Mude para a main e atualize:
    ```bash
@@ -68,9 +68,9 @@ Quando o código na `develop` estiver testado e pronto para ir ao ar (produção
    git pull origin main
    ```
 
-2. Traga as alterações da develop:
+2. Traga as alterações da desenvolvimento:
    ```bash
-   git merge develop
+   git merge desenvolvimento
    ```
 
 3. Suba a nova versão para produção:
@@ -79,4 +79,4 @@ Quando o código na `develop` estiver testado e pronto para ir ao ar (produção
    ```
 
 ---
-**Dica Pro**: Se quiser voltar a programar depois do deploy, lembre-se de rodar `git checkout develop`!
+**Dica Pro**: Se quiser voltar a programar depois do deploy, lembre-se de rodar `git checkout desenvolvimento`!
