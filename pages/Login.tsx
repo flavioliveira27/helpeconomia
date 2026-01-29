@@ -30,7 +30,7 @@ export const Login: React.FC = () => {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent text-white mb-4">
             <Wallet size={24} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">FinanSmart</h1>
+          <h1 className="text-2xl font-bold text-slate-800">HelpEconomia</h1>
           <p className="text-slate-500 mt-2">Acesse sua conta para continuar.</p>
         </div>
 

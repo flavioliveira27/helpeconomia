@@ -1,4 +1,4 @@
-# FinanSmart - Sistema de Controle Financeiro
+# HelpEconomia - Sistema de Controle Financeiro
 
 Sistema completo de controle financeiro com frontend React, backend Node.js/Express e banco de dados MySQL.
 

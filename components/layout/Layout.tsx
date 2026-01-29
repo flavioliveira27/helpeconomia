@@ -25,7 +25,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="bg-primary p-2 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none">
               <span className="material-icons-round text-white text-2xl">account_balance_wallet</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight">NoControle</h1>
+            <h1 className="text-xl font-bold tracking-tight">HelpEconomia</h1>
           </div>
 
           <nav className="flex-1 space-y-2">
