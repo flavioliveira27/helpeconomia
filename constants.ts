@@ -77,7 +77,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
 
 // Categorias Gerais (Income/Expenses)
 export const GENERAL_CATEGORIES = [
-  'Salário', 'Extras', 'Moradia', 'Contas', 'Alimentação', 'Lazer', 'Transporte', 'Saúde', 'Educação', 'Outros'
+  'Salário', 'Extras', 'Moradia', 'Contas', 'Alimentação', 'Lazer', 'Transporte', 'Veículo', 'Assinaturas', 'Saúde', 'Educação', 'Outros'
 ];
 
 // Categorias de Investimento
