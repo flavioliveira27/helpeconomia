@@ -97,8 +97,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 ml-72 p-10 bg-background-light dark:bg-background-dark transition-colors duration-300 min-h-screen">
-          <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+        <main className="flex-1 ml-72 p-10 print:ml-0 print:p-0 bg-background-light dark:bg-background-dark transition-colors duration-300 min-h-screen">
+          <div className="max-w-7xl mx-auto space-y-8 animate-fade-in print:max-w-none">
             {children}
           </div>
         </main>
