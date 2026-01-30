@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Transaction, TransactionType, TransactionPaymentMethod, TransactionImportance } from '../../types';
-import { CATEGORIES, GENERAL_CATEGORIES, INVESTMENT_CATEGORIES } from '../../constants';
+import { CATEGORIES, GENERAL_CATEGORIES, INVESTMENT_CATEGORIES, INCOME_CATEGORIES, FIXED_EXPENSE_CATEGORIES, VARIABLE_EXPENSE_CATEGORIES } from '../../constants';
 import { Button } from '../ui/Button';
 
 interface TransactionModalProps {
@@ -208,7 +208,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             value={formData.category}
                             onChange={e => setFormData({ ...formData, category: e.target.value })}
                         >
-                            {(type === TransactionType.INVESTMENT ? INVESTMENT_CATEGORIES : GENERAL_CATEGORIES).map(c => (
+                            {(type === TransactionType.INVESTMENT
+                                ? INVESTMENT_CATEGORIES
+                                : type === TransactionType.INCOME
+                                    ? INCOME_CATEGORIES
+                                    : type === TransactionType.FIXED_EXPENSE
+                                        ? FIXED_EXPENSE_CATEGORIES
+                                        : VARIABLE_EXPENSE_CATEGORIES
+                            ).map(c => (
                                 <option key={c} value={c}>{c}</option>
                             ))}
                         </select>

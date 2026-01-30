@@ -5,7 +5,8 @@ import {
   TopVillains,
   Trends,
   SixMonthEvolutionChart,
-  InvestmentDistributionChart
+  InvestmentDistributionChart,
+  IncomeChart
 } from '../components/charts/DashboardCharts';
 import { useFinancial } from '../contexts/FinancialContext';
 import { MonthSelector } from '../components/ui/MonthSelector';
@@ -97,17 +98,34 @@ export const Reports: React.FC = () => {
 
   const investmentBreakdown = useMemo(() => {
     const investments = filteredTransactions.filter(t => t.type === TransactionType.INVESTMENT);
-
-    // Group by Category
     const byCategory = investments.reduce((acc, t) => {
       const category = t.category || 'Outros';
       acc[category] = (acc[category] || 0) + Number(t.amount);
       return acc;
     }, {} as Record<string, number>);
+    return Object.entries(byCategory).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
 
-    return Object.entries(byCategory)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value); // Sort by highest value
+  // Derived state for Print Report (Expense Categories)
+  const expenseCategoryBreakdown = useMemo(() => {
+    const expenses = filteredTransactions.filter(t => t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE);
+    const byCategory = expenses.reduce((acc, t) => {
+      const category = t.category || 'Outros';
+      acc[category] = (acc[category] || 0) + Number(t.amount);
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(byCategory).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
+
+  // Derived state for Print Report (Income Categories - Detailed)
+  const incomeCategoryBreakdown = useMemo(() => {
+    const incomes = filteredTransactions.filter(t => t.type === TransactionType.INCOME);
+    const byCategory = incomes.reduce((acc, t) => {
+      const category = t.category || 'Outros';
+      acc[category] = (acc[category] || 0) + Number(t.amount);
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(byCategory).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filteredTransactions]);
 
   const toggleSection = (section: string) => {
@@ -121,8 +139,8 @@ export const Reports: React.FC = () => {
   return (
     <div className="space-y-8 pb-10">
 
-      {/* Header with Month Selector */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 no-print">
+      {/* Screen Header */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 print:hidden">
         <div>
           <h2 className="text-3xl font-bold">Relatórios Financeiros</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
@@ -155,14 +173,156 @@ export const Reports: React.FC = () => {
         </div>
       </header>
 
-      {/* Print Header (Visible only on print) */}
-      <div className="hidden print:block mb-8 border-b border-slate-300 pb-4">
-        <h1 className="text-3xl font-bold text-slate-800">Relatório Financeiro Mensal</h1>
-        <p className="text-slate-600 mt-2">Período: {months[selectedMonth]} de {selectedYear}</p>
-        <p className="text-slate-500 text-sm">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
+      {/* --- PROFESSIONAL PRINT LAYOUT (A4 Landscape Optimized) --- */}
+      <div className="hidden print:block w-full">
+        {/* Print Header */}
+        <div className="flex flex-col items-center justify-center border-b-2 border-slate-800 pb-6 mb-8 text-center">
+          <div>
+            <h1 className="text-5xl font-bold text-slate-900 tracking-tight mb-2">HelpEconomia</h1>
+            <p className="text-slate-500 text-sm uppercase tracking-widest font-semibold">Relatório Financeiro Mensal</p>
+          </div>
+          <div className="mt-4">
+            <p className="text-xl font-bold text-slate-800">{months[selectedMonth]} {selectedYear}</p>
+            <p className="text-slate-500 text-xs mt-1">Gerado em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
+          </div>
+        </div>
+
+        {/* Executive Summary Cards */}
+        {/* Executive Summary Cards - Stacked for Portrait */}
+        <div className="flex flex-col gap-4 mb-8 max-w-lg mx-auto w-full">
+          <div className="p-4 border border-emerald-200 rounded-xl bg-emerald-50/50 flex justify-between items-center">
+            <span className="text-sm text-slate-600 uppercase font-bold">Receitas Totais</span>
+            <span className="text-2xl font-bold text-emerald-700">{formatMoney(summary.totalIncome)}</span>
+          </div>
+          <div className="p-4 border border-rose-200 rounded-xl bg-rose-50/50 flex justify-between items-center">
+            <span className="text-sm text-slate-600 uppercase font-bold">Despesas Totais</span>
+            <span className="text-2xl font-bold text-rose-700">{formatMoney(summary.totalFixedExpenses + summary.totalVariableExpenses)}</span>
+          </div>
+          <div className="p-4 border border-blue-200 rounded-xl bg-blue-50/50 flex justify-between items-center">
+            <span className="text-sm text-slate-600 uppercase font-bold">Total Investido</span>
+            <span className="text-2xl font-bold text-blue-700">{formatMoney(summary.totalInvestments)}</span>
+          </div>
+          <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex justify-between items-center mt-2 border-t-4 border-t-slate-300">
+            <span className="text-sm text-slate-600 uppercase font-bold">Saldo Líquido</span>
+            <span className={`text-3xl font-bold ${summary.balance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatMoney(summary.balance)}</span>
+          </div>
+        </div>
+
+        {/* Detailed Columns */}
+        {/* Detailed Columns - Single Column Stacked */}
+        <div className="flex flex-col gap-10 max-w-2xl mx-auto w-full">
+          {/* Income Column */}
+          <div className="break-inside-avoid">
+            <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-200 pb-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Receitas</h3>
+            </div>
+            <table className="w-full text-sm">
+              <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+                <tr>
+                  <th className="text-left py-2 pl-2">Categoria</th>
+                  <th className="text-right py-2 pr-2">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {incomeCategoryBreakdown.map((item) => (
+                  <tr key={item.name}>
+                    <td className="py-3 pl-2 text-slate-600">{item.name}</td>
+                    <td className="py-3 pr-2 text-right font-medium text-emerald-600">{formatMoney(item.value)}</td>
+                  </tr>
+                ))}
+                {incomeCategoryBreakdown.length === 0 && (
+                  <tr><td colSpan={2} className="py-4 text-center text-slate-400 italic">Sem registros</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Expenses Column */}
+          <div className="break-inside-avoid">
+            <div className="flex items-center justify-center gap-2 mb-4 border-b border-rose-200 pb-2">
+              <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
+              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Despesas</h3>
+            </div>
+            <table className="w-full text-sm">
+              <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+                <tr>
+                  <th className="text-left py-2 pl-2">Categoria</th>
+                  <th className="text-right py-2">Participação</th>
+                  <th className="text-right py-2 pr-2">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {expenseCategoryBreakdown.map((item) => {
+                  const total = summary.totalFixedExpenses + summary.totalVariableExpenses;
+                  const percent = total > 0 ? (item.value / total) * 100 : 0;
+                  return (
+                    <tr key={item.name}>
+                      <td className="py-3 pl-2 text-slate-600 truncate">{item.name}</td>
+                      <td className="py-3 text-right text-slate-400 text-xs font-mono">{Math.round(percent)}%</td>
+                      <td className="py-3 pr-2 text-right font-medium text-rose-600">{formatMoney(item.value)}</td>
+                    </tr>
+                  );
+                })}
+                {expenseCategoryBreakdown.length === 0 && (
+                  <tr><td colSpan={3} className="py-4 text-center text-slate-400 italic">Sem registros</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Investments Column */}
+          <div className="break-inside-avoid">
+            <div className="flex items-center justify-center gap-2 mb-4 border-b border-blue-200 pb-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Investimentos</h3>
+            </div>
+            <div className="space-y-4">
+              {/* Visual Distribution for Print - Centered */}
+              {summary.totalInvestments > 0 && (
+                <div className="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 mb-6 mx-auto">
+                  {investmentBreakdown.map((item, idx) => {
+                    const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-sky-500', 'bg-cyan-500', 'bg-teal-500'];
+                    const color = colors[idx % colors.length];
+                    const width = (item.value / summary.totalInvestments) * 100;
+                    if (width < 1) return null;
+                    return <div key={item.name} className={`${color} h-full`} style={{ width: `${width}%` }}></div>;
+                  })}
+                </div>
+              )}
+
+              <table className="w-full text-sm">
+                <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+                  <tr>
+                    <th className="text-left py-2 pl-2">Ativo</th>
+                    <th className="text-right py-2 pr-2">Valor Aportado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {investmentBreakdown.map((item) => (
+                    <tr key={item.name}>
+                      <td className="py-3 pl-2 text-slate-600">{item.name}</td>
+                      <td className="py-3 pr-2 text-right font-bold text-blue-600">{formatMoney(item.value)}</td>
+                    </tr>
+                  ))}
+                  {investmentBreakdown.length === 0 && (
+                    <tr><td colSpan={2} className="py-4 text-center text-slate-400 italic">Sem investimentos</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer info/Signature area */}
+        <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col items-center justify-center text-xs text-slate-400 text-center gap-1">
+          <p>HelpEconomia • {user?.email || 'Usuário'}</p>
+          <p>Este documento é para fins de controle pessoal e não possui valor fiscal.</p>
+        </div>
       </div>
 
-      <div className="space-y-8">
+      {/* --- INTERACTIVE DASHBOARD (Screen Only) --- */}
+      <div className="space-y-8 print:hidden">
 
         {/* Top Section: Breakdown & Tips */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -196,8 +356,8 @@ export const Reports: React.FC = () => {
                 </button>
 
                 {expandedSection === 'income' && (
-                  <div className="bg-slate-50 dark:bg-slate-900/50 px-6 pb-6 pt-2 animate-fade-in">
-                    <div className="pl-14 space-y-3">
+                  <div className="bg-slate-50 dark:bg-slate-900/50 px-4 pb-4 pt-2 animate-fade-in">
+                    <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
                         <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Salários</span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatMoney(incomeBreakdown.salary)}</span>
@@ -233,8 +393,8 @@ export const Reports: React.FC = () => {
                 </button>
 
                 {expandedSection === 'expense' && (
-                  <div className="bg-slate-50 dark:bg-slate-900/50 px-6 pb-6 pt-2 animate-fade-in">
-                    <div className="pl-14 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-50 dark:bg-slate-900/50 px-4 pb-4 pt-2 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Payment Method Column */}
                       <div className="space-y-3">
                         <p className="text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Por Método</p>
@@ -291,8 +451,8 @@ export const Reports: React.FC = () => {
                 </button>
 
                 {expandedSection === 'investment' && (
-                  <div className="bg-slate-50 dark:bg-slate-900/50 px-6 pb-6 pt-2 animate-fade-in">
-                    <div className="pl-14 space-y-3">
+                  <div className="bg-slate-50 dark:bg-slate-900/50 px-4 pb-4 pt-2 animate-fade-in">
+                    <div className="space-y-3">
                       {investmentBreakdown.length > 0 ? (
                         investmentBreakdown.map((item) => (
                           <div key={item.name} className="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
@@ -375,29 +535,17 @@ export const Reports: React.FC = () => {
           </div>
         </div>
 
-        {/* Charts Grid - 3 Columns */}
+        {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 break-inside-avoid no-print">
-          {/* Row 1: 50/30/20 | Villains | Trends */}
-          <div className="h-full">
-            <Rule503020 />
-          </div>
-          <div className="h-full">
-            <TopVillains />
-          </div>
-          <div className="h-full">
-            <Trends />
-          </div>
+          {/* Row 1: KPI & Trends */}
+          <div className="h-full"><Rule503020 /></div>
+          <div className="h-full"><TopVillains /></div>
+          <div className="h-full"><Trends /></div>
 
           {/* Row 2: Category | Evolution | Investments */}
-          <div className="h-full">
-            <CategoryChart />
-          </div>
-          <div className="h-full">
-            <SixMonthEvolutionChart />
-          </div>
-          <div className="h-full">
-            <InvestmentDistributionChart />
-          </div>
+          <div className="h-full"><CategoryChart /></div>
+          <div className="h-full"><SixMonthEvolutionChart /></div>
+          <div className="h-full"><InvestmentDistributionChart /></div>
         </div>
 
       </div>

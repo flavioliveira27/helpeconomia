@@ -77,7 +77,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
 
 // Categorias Gerais (Income/Expenses)
 export const GENERAL_CATEGORIES = [
-  'Salário', 'Extras', 'Moradia', 'Contas', 'Alimentação', 'Lazer', 'Transporte', 'Veículo', 'Assinaturas', 'Saúde', 'Educação', 'Outros'
+  'Salário', 'Extras', 'Moradia', 'Contas', 'Alimentação', 'Lazer', 'Transporte', 'Veículo', 'Assinatura', 'Saúde', 'Educação', 'Outros'
 ];
 
 // Categorias de Investimento
@@ -87,7 +87,72 @@ export const INVESTMENT_CATEGORIES = [
   'Reserva Geral', 'Doação', 'Outros'
 ];
 
-// Combine for backward compatibility
-export const CATEGORIES = [...new Set([...GENERAL_CATEGORIES, ...INVESTMENT_CATEGORIES])];
+// Categorias de Receitas
+export const INCOME_CATEGORIES = [
+  'Salário', 'Extras', 'Freelance', 'Outros'
+];
 
-export const APP_NAME = "FinanSmart";
+// Categorias de Despesas Fixas
+export const FIXED_EXPENSE_CATEGORIES = [
+  'Moradia', 'Assinatura', 'Transporte', 'Concessionárias', 'Juros',
+  'Alimentação', 'Prestação', 'Saúde', 'Educação', 'Outros'
+];
+
+// Categorias de Gastos (Variáveis)
+export const VARIABLE_EXPENSE_CATEGORIES = [
+  'Moradia', 'Assinatura', 'Juros', 'Alimentação', 'Prestação',
+  'Saúde', 'Educação', 'Lazer', 'Extras', 'Transporte',
+  'Veículo', 'Diversos', 'Outros'
+];
+
+// Combine for backward compatibility
+export const CATEGORIES = [...new Set([...GENERAL_CATEGORIES, ...INVESTMENT_CATEGORIES, ...INCOME_CATEGORIES, ...FIXED_EXPENSE_CATEGORIES, ...VARIABLE_EXPENSE_CATEGORIES])];
+
+// Map de Cores (Centralizado)
+export const CATEGORY_COLORS: Record<string, string> = {
+  // Receitas
+  'Salário': '#10b981', // emerald-500
+  'Extras': '#14b8a6', // teal-500
+  'Freelance': '#a855f7', // purple-500
+
+  // Despesas
+  'Moradia': '#0ea5e9', // sky-500
+  'Contas': '#ef4444', // red-500
+  'Assinaturas': '#8b5cf6', // violet-500 (Legacy)
+  'Assinatura': '#8b5cf6', // violet-500
+  'assinatura': '#8b5cf6', // violet-500 (lowercase)
+  'Juros': '#991b1b', // red-800
+  'juros': '#991b1b', // red-800 (lowercase)
+  'Alimentação': '#f97316', // orange-500
+  'Prestação': '#db2777', // pink-600
+  'prestação': '#db2777', // pink-600 (lowercase)
+  'Prestacao': '#db2777', // pink-600 (no accent)
+  'prestacao': '#db2777', // pink-600 (lowercase no accent)
+  'Saúde': '#f43f5e', // rose-500
+  'Educação': '#6366f1', // indigo-500
+  'Lazer': '#ec4899', // pink-500
+  'Transporte': '#f59e0b', // amber-500
+  'Veículo': '#4338ca', // indigo-700
+  'Veiculo': '#4338ca', // indigo-700 (no accent)
+  'veiculo': '#4338ca', // indigo-700 (lowercase)
+  'Concessionárias': '#0891b2', // cyan-600
+  'Concessionarias': '#0891b2', // cyan-600 (no accent)
+  'Diversos': '#15803d', // green-700
+  'diversos': '#15803d', // green-700 (lowercase)
+  'Outros': '#64748b', // slate-500
+  'Extras (Despesa)': '#14b8a6', // teal-500 
+
+  // Investimentos
+  'Renda Fixa': '#3b82f6', // blue-500
+  'Renda Variável': '#6366f1', // indigo-500
+  'Reserva de Emergência': '#0ea5e9', // sky-500
+  'Meta': '#d946ef', // fuchsia-500
+  'Investimento Fixo': '#2563eb', // blue-600
+  'Criptomoeda': '#eab308', // yellow-500
+  'Fundo Cambial': '#059669', // emerald-600
+  'Poupança': '#84cc16', // lime-500
+  'Reserva Geral': '#94a3b8', // slate-400
+  'Doação': '#e11d48', // rose-600
+};
+
+export const APP_NAME = "HelpEconomia";
