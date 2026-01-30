@@ -28,33 +28,116 @@ export const Reports: React.FC = () => {
     window.print();
   };
 
-  const handleExportCSV = () => {
-    // Define Headers
-    const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor', 'Método', 'Importância'];
+  const handleExportExcel = () => {
+    // 1. Define Styles and content for the HTML-based Excel file
+    // This allows us to use colors, fonts, and borders without external libraries like exceljs (which requires npm).
 
-    // Format rows
-    const rows = filteredTransactions.map(t => [
-      t.date,
-      `"${t.description.replace(/"/g, '""')}"`, // Escape quotes
-      t.category,
-      t.type,
-      t.amount.toString().replace('.', ','), // Brazilian Format
-      t.paymentMethod || '-',
-      t.importance || '-'
-    ]);
+    // Helper to format currency for the Excel view
+    const fmt = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('pt-BR');
 
-    // Build CSV Content
-    const csvContent = [
-      headers.join(';'),
-      ...rows.map(row => row.join(';'))
-    ].join('\n');
+    let tableRows = '';
 
-    // Create Blob and Download
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    filteredTransactions.forEach(t => {
+      // Determine Row Color based on Type
+      // Using light pastels for readability
+      let bgStyle = '';
+      let textStyle = 'color: #334155;'; // Slate 700
+
+      if (t.type === 'receita') {
+        bgStyle = 'background-color: #d1fae5;'; // Emerald 100
+        textStyle = 'color: #065f46;'; // Emerald 800
+      } else if (t.type === 'despesa_fixa' || t.type === 'despesa_variavel') {
+        bgStyle = 'background-color: #ffe4e6;'; // Rose 100
+        textStyle = 'color: #9f1239;'; // Rose 800
+      } else if (t.type === 'investimento') {
+        bgStyle = 'background-color: #dbeafe;'; // Blue 100
+        textStyle = 'color: #1e40af;'; // Blue 800
+      }
+
+      tableRows += `
+        <tr style="${bgStyle} ${textStyle}">
+          <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">${fmtDate(t.date)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 5px;">${t.description}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 5px;">${t.category}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: right; font-weight: bold;">${fmt(Number(t.amount))}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 5px;">${t.paymentMethod || '-'}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 5px;">${t.importance || '-'}</td>
+        </tr>
+      `;
+    });
+
+    // Create the full HTML content
+    const excelContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="UTF-8">
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Relatório ${months[selectedMonth]}</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          body { font-family: 'Arial', sans-serif; }
+          .title { font-size: 18px; font-weight: bold; text-align: center; color: #0f172a; margin-bottom: 10px; }
+          .subtitle { font-size: 12px; text-align: center; color: #64748b; margin-bottom: 20px; }
+          th { background-color: #1e293b; color: #ffffff; padding: 10px; font-weight: bold; border: 1px solid #0f172a; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr>
+            <td colspan="6" class="title" style="background-color: #f1f5f9; height: 40px; font-size: 20px; vertical-align: middle;">HelpEconomia - Relatório Mensal</td>
+          </tr>
+          <tr>
+            <td colspan="6" class="subtitle" style="text-align: center; color: #64748b;">
+              Período: ${months[selectedMonth]} de ${selectedYear} | Gerado em: ${new Date().toLocaleDateString('pt-BR')}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>
+          <!-- Table Headers -->
+          <tr>
+            <th style="width: 100px;">Data</th>
+            <th style="width: 300px;">Descrição</th>
+            <th style="width: 150px;">Categoria</th>
+            <th style="width: 120px;">Valor</th>
+            <th style="width: 150px;">Método</th>
+            <th style="width: 120px;">Importância</th>
+          </tr>
+          <!-- Data -->
+          ${tableRows}
+          <!-- Totals Row -->
+           <tr>
+            <td colspan="6"></td>
+          </tr>
+           <tr style="background-color: #f8fafc; font-weight: bold;">
+            <td colspan="3" style="text-align: right; padding: 10px;">Saldo Líquido:</td>
+            <td style="text-align: right; color: ${summary.balance >= 0 ? '#059669' : '#e11d48'}; border: 1px solid #cbd5e1;">${fmt(summary.balance)}</td>
+            <td colspan="2"></td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Create Blob with Excel MIME type
+    const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Relatorio_HelpEconomia_${months[selectedMonth]}_${selectedYear}.csv`);
+    // Note: .xls extension triggers the HTML parsing in Excel
+    link.setAttribute('download', `Relatorio_HelpEconomia_${months[selectedMonth]}_${selectedYear}.xls`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -159,7 +242,7 @@ export const Reports: React.FC = () => {
         <div className="flex items-center gap-3">
           <HeaderActions />
           <button
-            onClick={handleExportCSV}
+            onClick={handleExportExcel}
             className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-medium text-sm shadow-sm"
           >
             <Download size={18} />
