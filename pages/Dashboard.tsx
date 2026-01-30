@@ -246,7 +246,7 @@ export const Dashboard: React.FC = () => {
               <Pie
                 data={[
                   { name: 'Despesas Fixas', value: totalFixed, color: '#c084fc' },
-                  { name: 'Gastos Variáveis', value: totalVariable, color: '#f87171' },
+                  { name: 'Gastos', value: totalVariable, color: '#f87171' },
                   { name: 'Investimentos', value: totalInvestments, color: '#38bdf8' },
                   { name: 'Saldo Restante', value: balanceVal, color: '#34d399' }
                 ].filter(item => item.value > 0)}
@@ -260,7 +260,7 @@ export const Dashboard: React.FC = () => {
               >
                 {[
                   { name: 'Despesas Fixas', value: totalFixed, color: '#c084fc' },
-                  { name: 'Gastos Variáveis', value: totalVariable, color: '#f87171' },
+                  { name: 'Gastos', value: totalVariable, color: '#f87171' },
                   { name: 'Investimentos', value: totalInvestments, color: '#38bdf8' },
                   { name: 'Saldo Restante', value: balanceVal, color: '#34d399' }
                 ].filter(item => item.value > 0).map((entry, index) => (
@@ -296,7 +296,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <span className="text-sm font-medium">Gastos Variáveis</span>
+                <span className="text-sm font-medium">Gastos</span>
               </div>
               <span className="text-sm font-bold">{Math.round(percentVariable)}%</span>
             </div>

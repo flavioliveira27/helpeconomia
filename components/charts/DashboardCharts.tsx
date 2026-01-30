@@ -5,39 +5,10 @@ import {
 import { useFinancial } from '../../contexts/FinancialContext';
 import { TransactionType, TransactionImportance } from '../../types';
 
-// Mapeamento de Cores por Categoria (Hex codes para o gráfico)
-const CATEGORY_COLOR_MAP: Record<string, string> = {
-  // Receitas
-  'Salário': '#10b981', // emerald-500
-  'Extras': '#14b8a6', // teal-500
-
-  // Despesas
-  'Moradia': '#06b6d4', // cyan-500
-  'Contas': '#ef4444', // red-500
-  'Saúde': '#f43f5e', // rose-500
-  'Educação': '#8b5cf6', // violet-500
-  'Alimentação': '#f97316', // orange-500
-  'Transporte': '#f59e0b', // amber-500
-  'Lazer': '#ec4899', // pink-500
-  'Assinaturas': '#c084fc', // purple-400
-  'Veículo': '#475569', // slate-600
-  'Outros': '#64748b', // slate-500
-
-  // Investimentos
-  'Renda Fixa': '#3b82f6', // blue-500
-  'Renda Variável': '#6366f1', // indigo-500
-  'Reserva de Emergência': '#0ea5e9', // sky-500
-  'Meta': '#d946ef', // fuchsia-500
-  'Investimento Fixo': '#2563eb', // blue-600
-  'Criptomoeda': '#eab308', // yellow-500
-  'Fundo Cambial': '#059669', // emerald-600
-  'Poupança': '#84cc16', // lime-500
-  'Reserva Geral': '#94a3b8', // slate-400
-  'Doação': '#e11d48', // rose-600
-};
+import { CATEGORY_COLORS } from '../../constants';
 
 const getCategoryColor = (category: string) => {
-  return CATEGORY_COLOR_MAP[category] || '#94a3b8'; // Default to slate if not found
+  return CATEGORY_COLORS[category] || '#94a3b8'; // Default to slate if not found
 };
 
 const formatMoney = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -117,10 +88,10 @@ export const CategoryChart: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar flex-1">
+      <div className="mt-2 space-y-1 max-h-60 overflow-y-auto pr-2 custom-scrollbar flex-1">
         {expenseData.length > 0 ? (
           expenseData.map((item) => (
-            <div key={item.name} className="flex items-center justify-between group cursor-default py-1">
+            <div key={item.name} className="flex items-center justify-between group cursor-default py-0.5">
               <div className="flex items-center gap-2">
                 <div
                   className="w-2.5 h-2.5 rounded-full shadow-sm"
@@ -130,7 +101,7 @@ export const CategoryChart: React.FC = () => {
                   {item.name}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <span className="text-[10px] text-slate-400 font-mono">
                   {totalExpenses > 0 ? Math.round((item.value / totalExpenses) * 100) : 0}%
                 </span>
@@ -163,16 +134,20 @@ export const Rule503020: React.FC = () => {
       const val = Number(t.amount);
       if (t.type === TransactionType.INCOME) {
         income += val;
-      } else if (t.type === TransactionType.INVESTMENT) {
-        investments += val;
       } else {
         const category = t.category;
+        const investCats = ['Renda Fixa', 'Renda Variável', 'Reserva de Emergência', 'Meta', 'Investimento Fixo', 'Criptomoeda', 'Fundo Cambial', 'Poupança', 'Reserva Geral', 'Doação'];
+        const essentialCats = ['Moradia', 'Assinatura', 'Transporte', 'Concessionárias', 'Alimentação', 'Saúde', 'Educação'];
+        const lifestyleCats = ['Juros', 'Prestação', 'Lazer', 'Extras', 'Veículo', 'Diversos'];
 
-        if (['Contas', 'Moradia', 'Saúde', 'Educação', 'Alimentação', 'Transporte', 'Veículo'].includes(category)) {
+        if (investCats.includes(category) || t.type === TransactionType.INVESTMENT) {
+          investments += val;
+        } else if (essentialCats.includes(category)) {
           essentials += val;
-        } else if (['Lazer', 'Assinaturas', 'Outros'].includes(category)) {
+        } else if (lifestyleCats.includes(category)) {
           lifestyle += val;
         } else {
+          // Fallback logic
           if (t.importance === TransactionImportance.ESSENTIAL) {
             essentials += val;
           } else {
@@ -205,7 +180,7 @@ export const Rule503020: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Essentials */}
           <div>
             <div className="flex justify-between text-sm mb-2">
@@ -280,14 +255,14 @@ export const TopVillains: React.FC = () => {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Maiores Gastos</h3>
-          <p className="text-xs text-slate-500 mt-1">Top 5 gastos variáveis do mês</p>
+          <p className="text-xs text-slate-500 mt-1">5 maiores gastos do mês</p>
         </div>
         <div className="p-2 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-rose-500 dark:text-rose-400">
           <span className="material-icons-round text-xl">money_off</span>
         </div>
       </div>
 
-      <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+      <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
         {topVillains.length > 0 ? (
           topVillains.map((t, idx) => (
             <div key={t.id} className="flex items-center gap-4 group">
@@ -367,7 +342,7 @@ export const Trends: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Income Trend */}
           <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
             <div className="flex items-center gap-3">
@@ -562,10 +537,10 @@ export const InvestmentDistributionChart: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar flex-1">
+      <div className="mt-2 space-y-1 max-h-60 overflow-y-auto pr-2 custom-scrollbar flex-1">
         {investmentData.length > 0 ? (
           investmentData.map((item) => (
-            <div key={item.name} className="flex items-center justify-between group cursor-default py-1">
+            <div key={item.name} className="flex items-center justify-between group cursor-default py-0.5">
               <div className="flex items-center gap-2">
                 <div
                   className="w-2.5 h-2.5 rounded-full shadow-sm"
@@ -575,7 +550,7 @@ export const InvestmentDistributionChart: React.FC = () => {
                   {item.name}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <span className="text-[10px] text-slate-400 font-mono">
                   {totalInvested > 0 ? Math.round((item.value / totalInvested) * 100) : 0}%
                 </span>
@@ -597,6 +572,110 @@ export const InvestmentDistributionChart: React.FC = () => {
 
 // Deprecated wrapper to maintain backward compatibility if used anywhere else
 // But mostly to just import everything
+export const IncomeChart: React.FC = () => {
+  const { filteredTransactions } = useFinancial();
+
+  const { data: incomeData, totalIncome } = useMemo(() => {
+    const incomes = filteredTransactions.filter(t => t.type === TransactionType.INCOME);
+
+    const categoryTotals: Record<string, number> = {};
+    incomes.forEach(t => {
+      categoryTotals[t.category] = (categoryTotals[t.category] || 0) + Number(t.amount);
+    });
+
+    const total = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
+
+    const data = Object.keys(categoryTotals)
+      .map((cat, index) => ({
+        name: cat,
+        value: categoryTotals[cat],
+        color: getCategoryColor(cat)
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    return { data, totalIncome: total };
+  }, [filteredTransactions]);
+
+  return (
+    <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col h-full">
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">Receitas por Categoria</h3>
+
+      <div className="flex justify-center relative py-4 shrink-0">
+        <div className="h-64 w-64 relative">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={incomeData}
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={100}
+                paddingAngle={2}
+                dataKey="value"
+                stroke="none"
+              >
+                {incomeData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => formatMoney(value)}
+                itemStyle={{ color: '#334155', fontWeight: 600 }}
+                contentStyle={{
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  border: 'none',
+                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                }}
+                cursor={false}
+                wrapperStyle={{ zIndex: 50 }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-xl font-bold text-slate-700 dark:text-slate-200">
+              {formatMoney(totalIncome)}
+            </span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+              Total
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 space-y-1 max-h-60 overflow-y-auto pr-2 custom-scrollbar flex-1">
+        {incomeData.length > 0 ? (
+          incomeData.map((item) => (
+            <div key={item.name} className="flex items-center justify-between group cursor-default py-1">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-2.5 h-2.5 rounded-full shadow-sm"
+                  style={{ backgroundColor: item.color }}
+                ></div>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate max-w-[120px]">
+                  {item.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {totalIncome > 0 ? Math.round((item.value / totalIncome) * 100) : 0}%
+                </span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 font-mono">
+                  {formatMoney(item.value)}
+                </span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-slate-400 py-4 text-xs">
+            Sem receitas.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const DashboardCharts: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

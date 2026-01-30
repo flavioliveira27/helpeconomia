@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useFinancial } from '../../contexts/FinancialContext';
 import { Transaction, TransactionType } from '../../types';
-import { CATEGORIES } from '../../constants';
+import { CATEGORIES, CATEGORY_COLORS } from '../../constants';
 import { Trash2, Plus, Edit2, Save, X } from 'lucide-react';
 
 export const Spreadsheet: React.FC = () => {
   const { transactions, updateTransaction, deleteTransaction, addTransaction } = useFinancial();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Transaction>>({});
-  
+
   // New row state
   const [isAdding, setIsAdding] = useState(false);
   const [newRow, setNewRow] = useState<Partial<Transaction>>({
@@ -62,11 +62,11 @@ export const Spreadsheet: React.FC = () => {
 
   const getTypeLabel = (type: TransactionType) => {
     switch (type) {
-        case TransactionType.INCOME: return 'Renda';
-        case TransactionType.FIXED_EXPENSE: return 'Despesa Fixa';
-        case TransactionType.VARIABLE_EXPENSE: return 'Despesa Variável';
-        case TransactionType.INVESTMENT: return 'Investimento';
-        default: return type;
+      case TransactionType.INCOME: return 'Renda';
+      case TransactionType.FIXED_EXPENSE: return 'Despesa Fixa';
+      case TransactionType.VARIABLE_EXPENSE: return 'Despesa Variável';
+      case TransactionType.INVESTMENT: return 'Investimento';
+      default: return type;
     }
   };
 
@@ -74,10 +74,10 @@ export const Spreadsheet: React.FC = () => {
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
       <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
         <h2 className="font-semibold text-slate-700 flex items-center gap-2">
-            <span className="w-2 h-6 bg-accent rounded-full"></span>
-            Lançamentos
+          <span className="w-2 h-6 bg-accent rounded-full"></span>
+          Lançamentos
         </h2>
-        <button 
+        <button
           onClick={() => setIsAdding(true)}
           className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-md hover:bg-blue-600 transition-colors text-sm font-medium"
         >
@@ -100,56 +100,56 @@ export const Spreadsheet: React.FC = () => {
           <tbody className="divide-y divide-slate-100">
             {isAdding && (
               <tr className="bg-blue-50/50 animate-pulse">
-                 <td className="px-6 py-3">
-                    <input 
-                        type="date" 
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                        value={newRow.date}
-                        onChange={e => setNewRow({...newRow, date: e.target.value})}
-                    />
-                 </td>
-                 <td className="px-6 py-3">
-                    <select 
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                        value={newRow.type}
-                        onChange={e => setNewRow({...newRow, type: e.target.value as TransactionType})}
-                    >
-                        {Object.values(TransactionType).map(t => (
-                            <option key={t} value={t}>{getTypeLabel(t)}</option>
-                        ))}
-                    </select>
-                 </td>
-                 <td className="px-6 py-3">
-                     <select 
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                        value={newRow.category}
-                        onChange={e => setNewRow({...newRow, category: e.target.value})}
-                    >
-                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                 </td>
-                 <td className="px-6 py-3">
-                    <input 
-                        type="text" 
-                        placeholder="Descrição..."
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
-                        value={newRow.description}
-                        onChange={e => setNewRow({...newRow, description: e.target.value})}
-                    />
-                 </td>
-                 <td className="px-6 py-3 text-right">
-                    <input 
-                        type="number" 
-                        step="0.01"
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-right"
-                        value={newRow.amount}
-                        onChange={e => setNewRow({...newRow, amount: parseFloat(e.target.value)})}
-                    />
-                 </td>
-                 <td className="px-6 py-3 flex justify-center gap-2">
-                    <button onClick={handleAddSave} className="text-emerald-600 hover:text-emerald-800"><Save size={16} /></button>
-                    <button onClick={() => setIsAdding(false)} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
-                 </td>
+                <td className="px-6 py-3">
+                  <input
+                    type="date"
+                    className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    value={newRow.date}
+                    onChange={e => setNewRow({ ...newRow, date: e.target.value })}
+                  />
+                </td>
+                <td className="px-6 py-3">
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    value={newRow.type}
+                    onChange={e => setNewRow({ ...newRow, type: e.target.value as TransactionType })}
+                  >
+                    {Object.values(TransactionType).map(t => (
+                      <option key={t} value={t}>{getTypeLabel(t)}</option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-6 py-3">
+                  <select
+                    className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    value={newRow.category}
+                    onChange={e => setNewRow({ ...newRow, category: e.target.value })}
+                  >
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </td>
+                <td className="px-6 py-3">
+                  <input
+                    type="text"
+                    placeholder="Descrição..."
+                    className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                    value={newRow.description}
+                    onChange={e => setNewRow({ ...newRow, description: e.target.value })}
+                  />
+                </td>
+                <td className="px-6 py-3 text-right">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-right"
+                    value={newRow.amount}
+                    onChange={e => setNewRow({ ...newRow, amount: parseFloat(e.target.value) })}
+                  />
+                </td>
+                <td className="px-6 py-3 flex justify-center gap-2">
+                  <button onClick={handleAddSave} className="text-emerald-600 hover:text-emerald-800"><Save size={16} /></button>
+                  <button onClick={() => setIsAdding(false)} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
+                </td>
               </tr>
             )}
 
@@ -157,54 +157,54 @@ export const Spreadsheet: React.FC = () => {
               <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
                 {editingId === t.id ? (
                   <>
-                     <td className="px-6 py-3">
-                        <input 
-                            type="date" 
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
-                            value={editForm.date}
-                            onChange={e => setEditForm({...editForm, date: e.target.value})}
-                        />
-                     </td>
-                     <td className="px-6 py-3">
-                        <select 
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
-                            value={editForm.type}
-                            onChange={e => setEditForm({...editForm, type: e.target.value as TransactionType})}
-                        >
-                            {Object.values(TransactionType).map(type => (
-                                <option key={type} value={type}>{getTypeLabel(type)}</option>
-                            ))}
-                        </select>
-                     </td>
-                     <td className="px-6 py-3">
-                        <select 
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
-                            value={editForm.category}
-                            onChange={e => setEditForm({...editForm, category: e.target.value})}
-                        >
-                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                     </td>
-                     <td className="px-6 py-3">
-                        <input 
-                            type="text" 
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
-                            value={editForm.description}
-                            onChange={e => setEditForm({...editForm, description: e.target.value})}
-                        />
-                     </td>
-                     <td className="px-6 py-3 text-right">
-                        <input 
-                            type="number" 
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-xs text-right"
-                            value={editForm.amount}
-                            onChange={e => setEditForm({...editForm, amount: parseFloat(e.target.value)})}
-                        />
-                     </td>
-                     <td className="px-6 py-3 flex justify-center gap-2">
-                        <button onClick={handleSaveClick} className="text-emerald-600 hover:text-emerald-800"><Save size={16} /></button>
-                        <button onClick={handleCancelClick} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
-                     </td>
+                    <td className="px-6 py-3">
+                      <input
+                        type="date"
+                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                        value={editForm.date}
+                        onChange={e => setEditForm({ ...editForm, date: e.target.value })}
+                      />
+                    </td>
+                    <td className="px-6 py-3">
+                      <select
+                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                        value={editForm.type}
+                        onChange={e => setEditForm({ ...editForm, type: e.target.value as TransactionType })}
+                      >
+                        {Object.values(TransactionType).map(type => (
+                          <option key={type} value={type}>{getTypeLabel(type)}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-6 py-3">
+                      <select
+                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                        value={editForm.category}
+                        onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+                      >
+                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-6 py-3">
+                      <input
+                        type="text"
+                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                        value={editForm.description}
+                        onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                      />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <input
+                        type="number"
+                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs text-right"
+                        value={editForm.amount}
+                        onChange={e => setEditForm({ ...editForm, amount: parseFloat(e.target.value) })}
+                      />
+                    </td>
+                    <td className="px-6 py-3 flex justify-center gap-2">
+                      <button onClick={handleSaveClick} className="text-emerald-600 hover:text-emerald-800"><Save size={16} /></button>
+                      <button onClick={handleCancelClick} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
+                    </td>
                   </>
                 ) : (
                   <>
@@ -214,7 +214,17 @@ export const Spreadsheet: React.FC = () => {
                         {getTypeLabel(t.type)}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-slate-600">{t.category}</td>
+                    <td className="px-6 py-3">
+                      <span
+                        className="px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+                        style={{
+                          color: CATEGORY_COLORS[t.category] || '#64748b',
+                          backgroundColor: `${CATEGORY_COLORS[t.category] || '#64748b'}25`
+                        }}
+                      >
+                        {t.category}
+                      </span>
+                    </td>
                     <td className="px-6 py-3 font-medium text-slate-800">{t.description}</td>
                     <td className={`px-6 py-3 text-right font-semibold ${t.type === TransactionType.INCOME ? 'text-emerald-600' : 'text-slate-700'}`}>
                       R$ {t.amount.toFixed(2)}
@@ -228,11 +238,11 @@ export const Spreadsheet: React.FC = () => {
               </tr>
             ))}
             {transactions.length === 0 && !isAdding && (
-                <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                        Nenhuma transação registrada. Clique em "Nova Linha" para começar.
-                    </td>
-                </tr>
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                  Nenhuma transação registrada. Clique em "Nova Linha" para começar.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

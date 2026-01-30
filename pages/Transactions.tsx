@@ -17,8 +17,8 @@ export const Transactions: React.FC = () => {
     <div className="space-y-6">
       <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Planilha de Controle</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Planilha de Controle</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             Gerenciando lançamentos de <span className="font-bold text-primary">{months[selectedMonth]}</span> de {selectedYear}
           </p>
         </div>
@@ -32,9 +32,9 @@ export const Transactions: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Row 1: Income Block - Full Width */}
-        <div className="md:col-span-2 h-full">
+      <div className="flex flex-col gap-8">
+        {/* Block 1: Income */}
+        <div className="w-full">
           <TransactionBlock
             title="Entradas"
             filterTypes={[TransactionType.INCOME]}
@@ -42,8 +42,8 @@ export const Transactions: React.FC = () => {
           />
         </div>
 
-        {/* Row 2 Left: Fixed Expenses Block */}
-        <div className="h-full">
+        {/* Block 2: Fixed Expenses */}
+        <div className="w-full">
           <TransactionBlock
             title="Despesas Fixas"
             filterTypes={[TransactionType.FIXED_EXPENSE]}
@@ -51,8 +51,8 @@ export const Transactions: React.FC = () => {
           />
         </div>
 
-        {/* Row 2 Right: Investments Block */}
-        <div className="h-full">
+        {/* Block 3: Investments */}
+        <div className="w-full">
           <TransactionBlock
             title="Investimentos"
             filterTypes={[TransactionType.INVESTMENT]}
@@ -60,8 +60,8 @@ export const Transactions: React.FC = () => {
           />
         </div>
 
-        {/* Row 3: Variable Expenses (Gastos) Block - Full Width */}
-        <div className="md:col-span-2 h-full">
+        {/* Block 4: Variable Expenses (Gastos) */}
+        <div className="w-full">
           <TransactionBlock
             title="Gastos"
             filterTypes={[TransactionType.VARIABLE_EXPENSE]}
