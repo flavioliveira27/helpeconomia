@@ -34,6 +34,7 @@ services:
       DB_NAME: helpeconomia
       DB_PORT: 3306
       JWT_SECRET: finansmart_secret_key_2024_super_secure
+      GEMINI_API_KEY: AIzaSyAf26DSPV2qwDwAL-9N2b6j1aMenqIK-N0
       PORT: 5000
     depends_on:
       mysql:
