@@ -54,7 +54,7 @@ export const Reports: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Relatorio_FinanSmart_${months[selectedMonth]}_${selectedYear}.csv`);
+    link.setAttribute('download', `Relatorio_HelpEconomia_${months[selectedMonth]}_${selectedYear}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -128,6 +128,14 @@ export const Reports: React.FC = () => {
     return Object.entries(byCategory).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filteredTransactions]);
 
+  // Top 5 Expenses for Print Report
+  const topExpenses = useMemo(() => {
+    return filteredTransactions
+      .filter(t => t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE)
+      .sort((a, b) => Number(b.amount) - Number(a.amount))
+      .slice(0, 5);
+  }, [filteredTransactions]);
+
   const toggleSection = (section: string) => {
     if (expandedSection === section) {
       setExpandedSection(null);
@@ -173,83 +181,108 @@ export const Reports: React.FC = () => {
         </div>
       </header>
 
-      {/* --- PROFESSIONAL PRINT LAYOUT (A4 Landscape Optimized) --- */}
-      <div className="hidden print:block w-full">
+      {/* --- PROFESSIONAL PRINT LAYOUT (A4) --- */}
+      <div className="hidden print:block w-full text-slate-900">
         {/* Print Header */}
-        <div className="flex flex-col items-center justify-center border-b-2 border-slate-800 pb-6 mb-8 text-center">
-          <div>
-            <h1 className="text-5xl font-bold text-slate-900 tracking-tight mb-2">HelpEconomia</h1>
-            <p className="text-slate-500 text-sm uppercase tracking-widest font-semibold">Relatório Financeiro Mensal</p>
-          </div>
-          <div className="mt-4">
-            <p className="text-xl font-bold text-slate-800">{months[selectedMonth]} {selectedYear}</p>
-            <p className="text-slate-500 text-xs mt-1">Gerado em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
+        <div className="text-center border-b-2 border-slate-800 pb-6 mb-8">
+          <h1 className="text-4xl font-bold tracking-tight mb-1">HelpEconomia</h1>
+          <p className="text-xs uppercase tracking-widest font-semibold text-slate-500">Relatório Financeiro Mensal</p>
+          <div className="mt-4 flex justify-center items-center gap-4">
+            <span className="px-3 py-1 bg-slate-100 rounded text-sm font-bold">{months[selectedMonth]} {selectedYear}</span>
+            <span className="text-xs text-slate-400">Gerado em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</span>
           </div>
         </div>
 
-        {/* Executive Summary Cards */}
-        {/* Executive Summary Cards - Stacked for Portrait */}
-        <div className="flex flex-col gap-4 mb-8 max-w-lg mx-auto w-full">
-          <div className="p-4 border border-emerald-200 rounded-xl bg-emerald-50/50 flex justify-between items-center">
-            <span className="text-sm text-slate-600 uppercase font-bold">Receitas Totais</span>
-            <span className="text-2xl font-bold text-emerald-700">{formatMoney(summary.totalIncome)}</span>
+        {/* Executive Summary Grid */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="p-4 border border-slate-200 rounded-lg bg-emerald-50 text-center">
+            <span className="block text-xs uppercase font-bold text-slate-500 mb-1">Receitas</span>
+            <span className="text-xl font-bold text-emerald-700">{formatMoney(summary.totalIncome)}</span>
           </div>
-          <div className="p-4 border border-rose-200 rounded-xl bg-rose-50/50 flex justify-between items-center">
-            <span className="text-sm text-slate-600 uppercase font-bold">Despesas Totais</span>
-            <span className="text-2xl font-bold text-rose-700">{formatMoney(summary.totalFixedExpenses + summary.totalVariableExpenses)}</span>
+          <div className="p-4 border border-slate-200 rounded-lg bg-rose-50 text-center">
+            <span className="block text-xs uppercase font-bold text-slate-500 mb-1">Despesas</span>
+            <span className="text-xl font-bold text-rose-700">{formatMoney(summary.totalFixedExpenses + summary.totalVariableExpenses)}</span>
           </div>
-          <div className="p-4 border border-blue-200 rounded-xl bg-blue-50/50 flex justify-between items-center">
-            <span className="text-sm text-slate-600 uppercase font-bold">Total Investido</span>
-            <span className="text-2xl font-bold text-blue-700">{formatMoney(summary.totalInvestments)}</span>
+          <div className="p-4 border border-slate-200 rounded-lg bg-blue-50 text-center">
+            <span className="block text-xs uppercase font-bold text-slate-500 mb-1">Investimentos</span>
+            <span className="text-xl font-bold text-blue-700">{formatMoney(summary.totalInvestments)}</span>
           </div>
-          <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex justify-between items-center mt-2 border-t-4 border-t-slate-300">
-            <span className="text-sm text-slate-600 uppercase font-bold">Saldo Líquido</span>
-            <span className={`text-3xl font-bold ${summary.balance >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatMoney(summary.balance)}</span>
+          <div className={`p-4 border border-slate-200 rounded-lg text-center ${summary.balance >= 0 ? 'bg-emerald-100' : 'bg-rose-100'}`}>
+            <span className="block text-xs uppercase font-bold text-slate-600 mb-1">Saldo Líquido</span>
+            <span className={`text-xl font-bold ${summary.balance >= 0 ? 'text-emerald-800' : 'text-rose-800'}`}>{formatMoney(summary.balance)}</span>
           </div>
         </div>
 
-        {/* Detailed Columns */}
-        {/* Detailed Columns - Single Column Stacked */}
-        <div className="flex flex-col gap-10 max-w-2xl mx-auto w-full">
+        {/* Top Expenses Section */}
+        <div className="mb-8 break-inside-avoid p-6 border border-slate-200 rounded-xl">
+          <h3 className="text-sm font-bold uppercase text-slate-800 border-b border-slate-300 pb-2 mb-4">5 maiores gastos do mês</h3>
+          <table className="w-full text-sm">
+            <thead className="bg-slate-100 text-xs text-slate-500 uppercase">
+              <tr>
+                <th className="py-2 px-3 text-left">Descrição</th>
+                <th className="py-2 px-3 text-left">Categoria</th>
+                <th className="py-2 px-3 text-center">Data</th>
+                <th className="py-2 px-3 text-right">Valor</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {topExpenses.map((expense, idx) => (
+                <tr key={expense.id || idx} className="even:bg-slate-50/50">
+                  <td className="py-2 px-3 font-medium text-slate-700">{expense.description}</td>
+                  <td className="py-2 px-3 text-slate-500 text-xs">{expense.category}</td>
+                  <td className="py-2 px-3 text-center text-slate-500 text-xs">{new Date(expense.date).toLocaleDateString('pt-BR')}</td>
+                  <td className="py-2 px-3 text-right font-bold text-rose-600">{formatMoney(Number(expense.amount))}</td>
+                </tr>
+              ))}
+              {topExpenses.length === 0 && (
+                <tr><td colSpan={4} className="py-4 text-center text-slate-400 italic">Nenhum gasto registrado.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Detailed Columns Grid - Stacked Vertically */}
+        <div className="flex flex-col gap-6">
           {/* Income Column */}
-          <div className="break-inside-avoid">
-            <div className="flex items-center justify-center gap-2 mb-4 border-b border-emerald-200 pb-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Receitas</h3>
-            </div>
-            <table className="w-full text-sm">
-              <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+          <div className="break-inside-avoid w-full p-6 border border-slate-200 rounded-xl">
+            <h3 className="text-sm font-bold uppercase text-slate-800 border-b border-emerald-500 pb-2 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Detalhamento Receitas
+            </h3>
+            <table className="w-full text-sm border-collapse">
+              <thead className="text-xs text-slate-500 uppercase border-b border-slate-200">
                 <tr>
-                  <th className="text-left py-2 pl-2">Categoria</th>
-                  <th className="text-right py-2 pr-2">Valor</th>
+                  <th className="text-left py-2 font-semibold">Categoria</th>
+                  <th className="text-right py-2 font-semibold">Valor</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {incomeCategoryBreakdown.map((item) => (
                   <tr key={item.name}>
-                    <td className="py-3 pl-2 text-slate-600">{item.name}</td>
-                    <td className="py-3 pr-2 text-right font-medium text-emerald-600">{formatMoney(item.value)}</td>
+                    <td className="py-2 text-slate-600">{item.name}</td>
+                    <td className="py-2 text-right font-medium text-emerald-600">{formatMoney(item.value)}</td>
                   </tr>
                 ))}
-                {incomeCategoryBreakdown.length === 0 && (
-                  <tr><td colSpan={2} className="py-4 text-center text-slate-400 italic">Sem registros</td></tr>
-                )}
+                <tr className="bg-slate-50 font-bold border-t border-slate-200">
+                  <td className="py-2 text-slate-800 pl-2">Total</td>
+                  <td className="py-2 text-right text-emerald-700">{formatMoney(summary.totalIncome)}</td>
+                </tr>
               </tbody>
             </table>
           </div>
 
           {/* Expenses Column */}
-          <div className="break-inside-avoid">
-            <div className="flex items-center justify-center gap-2 mb-4 border-b border-rose-200 pb-2">
-              <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
-              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Despesas</h3>
-            </div>
+          <div className="break-inside-avoid w-full p-6 border border-slate-200 rounded-xl">
+            <h3 className="text-sm font-bold uppercase text-slate-800 border-b border-rose-500 pb-2 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+              Detalhamento Despesas
+            </h3>
             <table className="w-full text-sm">
-              <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+              <thead className="text-xs text-slate-500 uppercase border-b border-slate-200">
                 <tr>
-                  <th className="text-left py-2 pl-2">Categoria</th>
-                  <th className="text-right py-2">Participação</th>
-                  <th className="text-right py-2 pr-2">Valor</th>
+                  <th className="text-left py-2 font-semibold">Categoria</th>
+                  <th className="text-right py-2 font-semibold">%</th>
+                  <th className="text-right py-2 font-semibold">Valor</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -258,66 +291,55 @@ export const Reports: React.FC = () => {
                   const percent = total > 0 ? (item.value / total) * 100 : 0;
                   return (
                     <tr key={item.name}>
-                      <td className="py-3 pl-2 text-slate-600 truncate">{item.name}</td>
-                      <td className="py-3 text-right text-slate-400 text-xs font-mono">{Math.round(percent)}%</td>
-                      <td className="py-3 pr-2 text-right font-medium text-rose-600">{formatMoney(item.value)}</td>
+                      <td className="py-2 text-slate-600 truncate">{item.name}</td>
+                      <td className="py-2 text-right text-slate-400 text-xs font-mono">{Math.round(percent)}%</td>
+                      <td className="py-2 text-right font-medium text-rose-600">{formatMoney(item.value)}</td>
                     </tr>
                   );
                 })}
-                {expenseCategoryBreakdown.length === 0 && (
-                  <tr><td colSpan={3} className="py-4 text-center text-slate-400 italic">Sem registros</td></tr>
-                )}
+                <tr className="bg-slate-50 font-bold border-t border-slate-200">
+                  <td className="py-2 text-slate-800 pl-2">Total</td>
+                  <td className="py-2 text-right">100%</td>
+                  <td className="py-2 text-right text-rose-700">{formatMoney(summary.totalFixedExpenses + summary.totalVariableExpenses)}</td>
+                </tr>
               </tbody>
             </table>
           </div>
-
-          {/* Investments Column */}
-          <div className="break-inside-avoid">
-            <div className="flex items-center justify-center gap-2 mb-4 border-b border-blue-200 pb-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <h3 className="font-bold text-slate-800 text-lg uppercase tracking-wide">Investimentos</h3>
-            </div>
-            <div className="space-y-4">
-              {/* Visual Distribution for Print - Centered */}
-              {summary.totalInvestments > 0 && (
-                <div className="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 mb-6 mx-auto">
-                  {investmentBreakdown.map((item, idx) => {
-                    const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-sky-500', 'bg-cyan-500', 'bg-teal-500'];
-                    const color = colors[idx % colors.length];
-                    const width = (item.value / summary.totalInvestments) * 100;
-                    if (width < 1) return null;
-                    return <div key={item.name} className={`${color} h-full`} style={{ width: `${width}%` }}></div>;
-                  })}
-                </div>
-              )}
-
-              <table className="w-full text-sm">
-                <thead className="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
-                  <tr>
-                    <th className="text-left py-2 pl-2">Ativo</th>
-                    <th className="text-right py-2 pr-2">Valor Aportado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {investmentBreakdown.map((item) => (
-                    <tr key={item.name}>
-                      <td className="py-3 pl-2 text-slate-600">{item.name}</td>
-                      <td className="py-3 pr-2 text-right font-bold text-blue-600">{formatMoney(item.value)}</td>
-                    </tr>
-                  ))}
-                  {investmentBreakdown.length === 0 && (
-                    <tr><td colSpan={2} className="py-4 text-center text-slate-400 italic">Sem investimentos</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
 
+        {/* Investments Section */}
+        {summary.totalInvestments > 0 && (
+          <div className="mt-2 break-inside-avoid p-6 border border-slate-200 rounded-xl">
+            <h3 className="text-sm font-bold uppercase text-slate-800 border-b border-blue-500 pb-2 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              Investimentos
+            </h3>
+            {/* Visual Distribution Bar */}
+            <div className="flex h-4 w-full rounded-md overflow-hidden bg-slate-100 mb-6">
+              {investmentBreakdown.map((item, idx) => {
+                const colors = ['bg-blue-600', 'bg-indigo-500', 'bg-sky-500', 'bg-cyan-500', 'bg-teal-500'];
+                const color = colors[idx % colors.length];
+                const width = (item.value / summary.totalInvestments) * 100;
+                if (width < 0.5) return null;
+                return <div key={item.name} className={`${color} h-full border-r border-white/20`} style={{ width: `${width}%` }} title={`${item.name} (${Math.round(width)}%)`}></div>;
+              })}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {investmentBreakdown.map((item) => (
+                <div key={item.name} className="flex justify-between items-center p-3 border border-slate-100 rounded bg-slate-50/50">
+                  <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                  <span className="text-sm font-bold text-blue-700">{formatMoney(item.value)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Footer info/Signature area */}
-        <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col items-center justify-center text-xs text-slate-400 text-center gap-1">
-          <p>HelpEconomia • {user?.email || 'Usuário'}</p>
-          <p>Este documento é para fins de controle pessoal e não possui valor fiscal.</p>
+        <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col items-center justify-center text-xs text-slate-400 text-center gap-1 opacity-70">
+          <p className="font-semibold uppercase tracking-wider">{user?.name || 'Usuário'}</p>
+          <p>Relatório gerado automaticamente • HelpEconomia</p>
         </div>
       </div>
 
@@ -550,9 +572,6 @@ export const Reports: React.FC = () => {
 
       </div>
 
-      <div className="text-center text-xs text-slate-400 mt-8 hidden print:block">
-        Relatório gerado automaticamente pelo sistema FinanSmart.
-      </div>
     </div>
   );
 };
