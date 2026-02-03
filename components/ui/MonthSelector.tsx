@@ -18,7 +18,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
     ];
 
     return (
-        <div className="relative min-w-[200px]">
+        <div className="relative min-w-[140px] sm:min-w-[200px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span className="material-icons-round text-slate-400 text-lg">calendar_today</span>
             </div>

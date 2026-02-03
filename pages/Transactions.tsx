@@ -22,7 +22,7 @@ export const Transactions: React.FC = () => {
             Gerenciando lançamentos de <span className="font-bold text-primary">{months[selectedMonth]}</span> de {selectedYear}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <HeaderActions />
           <MonthSelector
             selectedMonth={selectedMonth}
