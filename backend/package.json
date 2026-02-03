@@ -1,7 +1,7 @@
 {
     "name": "finansmart-backend",
     "version": "1.0.0",
-    "description": "Backend API for FinanSmart",
+    "description": "Backend API for HelpEconomia",
     "main": "src/server.js",
     "type": "module",
     "scripts": {
@@ -9,7 +9,7 @@
         "dev": "node --watch src/server.js"
     },
     "dependencies": {
-        "@google/generative-ai": "^0.24.1",
+        "@google/genai": "^1.38.0",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "express": "^4.19.2",

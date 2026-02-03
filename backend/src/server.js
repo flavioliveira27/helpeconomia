@@ -17,7 +17,7 @@ app.use(express.json());
 
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'FinanSmart API is running' });
+    res.json({ status: 'OK', message: 'HelpEconomia API is running' });
 });
 
 // Routes

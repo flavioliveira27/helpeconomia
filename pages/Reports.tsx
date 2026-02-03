@@ -231,7 +231,7 @@ export const Reports: React.FC = () => {
     <div className="space-y-8 pb-10">
 
       {/* Screen Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 print:hidden">
+      <header className="flex flex-row flex-wrap items-center md:items-end justify-between gap-4 print:hidden">
         <div>
           <h2 className="text-3xl font-bold">Relatórios Financeiros</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
@@ -240,7 +240,9 @@ export const Reports: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <HeaderActions />
+          <div className="hidden lg:block">
+            <HeaderActions />
+          </div>
           <button
             onClick={handleExportExcel}
             className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-medium text-sm shadow-sm"
@@ -256,11 +258,13 @@ export const Reports: React.FC = () => {
             <span className="hidden sm:inline">Imprimir PDF</span>
           </button>
 
-          <MonthSelector
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
-            onMonthChange={setSelectedMonth}
-          />
+          <div className="hidden lg:block">
+            <MonthSelector
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              onMonthChange={setSelectedMonth}
+            />
+          </div>
         </div>
       </header>
 

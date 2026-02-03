@@ -118,7 +118,7 @@ export const Dashboard: React.FC = () => {
             Resumo de <span className="font-bold text-primary">{months[selectedMonth]}</span> de {selectedYear}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <HeaderActions />
           <MonthSelector
             selectedMonth={selectedMonth}
@@ -131,17 +131,17 @@ export const Dashboard: React.FC = () => {
       {/* AI Section */}
       <section className="bg-gradient-to-r from-pastel-sky to-pastel-purple dark:from-indigo-900/40 dark:to-purple-900/40 p-8 rounded-2xl border border-blue-100 dark:border-indigo-800 relative overflow-hidden transition-all">
         <div className="relative z-10 flex flex-col items-start gap-6 w-full">
-          <div className="flex items-center gap-8 w-full">
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-full shadow-xl shadow-blue-100 dark:shadow-none shrink-0">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8 w-full">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-full shadow-xl shadow-blue-100 dark:shadow-none shrink-0 text-center md:text-left">
               <span className="material-icons-round text-6xl text-primary animate-bounce">auto_awesome</span>
             </div>
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold flex items-center gap-2">
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-2">
                 Consultor IA
                 <span className="bg-primary text-white text-[10px] px-2 py-1 rounded-full uppercase tracking-widest font-bold">Smart</span>
               </h3>
               {!hasLoaded && !loading && (
-                <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed mx-auto md:mx-0">
                   Clique para gerar insights sobre suas finanças de <strong>{months[selectedMonth]}</strong>.
                 </p>
               )}
@@ -149,7 +149,7 @@ export const Dashboard: React.FC = () => {
             <button
               onClick={handleGenerateInsight}
               disabled={loading}
-              className="bg-primary hover:bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center gap-2 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full md:w-auto bg-primary hover:bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <span className={`material-icons-round text-xl ${loading ? 'animate-spin' : ''}`}>
                 {loading ? 'refresh' : 'auto_awesome'}
@@ -324,7 +324,8 @@ export const Dashboard: React.FC = () => {
             <Link to="/transactions" className="text-sm font-bold text-primary hover:underline">Ver todas</Link>
           </div>
           <div className="p-4 sm:p-6">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -367,6 +368,41 @@ export const Dashboard: React.FC = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {recentTransactions.length === 0 ? (
+                <div className="py-8 text-center text-slate-400">
+                  Nenhuma transação encontrada neste mês.
+                </div>
+              ) : (
+                recentTransactions.map((transaction) => (
+                  <div key={transaction.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-blue-500 shadow-sm">
+                          <span className="material-icons-round text-xl">
+                            {transaction.type === TransactionType.INCOME ? 'trending_up' : 'shopping_basket'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-700 dark:text-slate-200 line-clamp-1">{transaction.description}</p>
+                          <p className="text-xs text-slate-500">{new Date(transaction.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                      </div>
+                      <div className={`font-bold ${transaction.type === TransactionType.INCOME ? 'text-teal-600' : 'text-rose-500'}`}>
+                        {transaction.type === TransactionType.INCOME ? '+' : '-'} {formatMoney(transaction.amount)}
+                      </div>
+                    </div>
+                    <div>
+                      <span className={`px-2 py-1 rounded border text-[10px] font-bold shadow-sm whitespace-nowrap ${getCategoryTheme(transaction.category)}`}>
+                        {transaction.category}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
