@@ -1,20 +1,25 @@
-# Use an official Node.js runtime as a parent image
-FROM node:20-alpine
-
-# Set the working directory
+# Stage 1: Base (Dependências)
+FROM node:20-alpine AS base
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Stage 2: Development (Ambiente Local)
+FROM base AS development
 COPY . .
-
-# Expose the port the app runs on
 EXPOSE 3000
-
-# Start the application
 CMD ["npm", "run", "dev"]
+
+# Stage 3: Build (Compilação para Produção)
+FROM base AS build
+COPY . .
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build
+
+# Stage 4: Production (Nginx)
+FROM nginx:alpine AS production
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
