@@ -21,6 +21,11 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
+     logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: always
 
   backend:
@@ -46,22 +51,33 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     restart: always
 
   frontend:
-    build:
-      context: .
-      args:
-        - VITE_API_URL=https://api.helpeconomia.com.br
+    build: .
     container_name: helpeconomia_frontend
     ports:
-      - "8001:80"
+      - "8001:3000"
     environment:
+      - CHOKIDAR_USEPOLLING=true
       - VITE_API_URL=https://api.helpeconomia.com.br
     depends_on:
       - backend
     networks:
       - nginx-proxy-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - .:/app
+      - /app/node_modules
     restart: always
 
 networks:

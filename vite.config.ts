@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+	allowedHosts: ['helpeconomia.com.br', 'www.helpeconomia.com.br', 'api.helpeconomia.com.br'],
       },
       plugins: [react()],
       define: {
