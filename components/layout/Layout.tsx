@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFinancial } from '../../contexts/FinancialContext';
 import { Link, useLocation } from 'react-router-dom';
 import { MonthSelector } from '../ui/MonthSelector';
-import { HeaderActions } from '../ui/HeaderActions';
+
 
 interface LayoutProps {
   children: React.ReactNode;
