@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Transactions } from './pages/Transactions';
 import { Reports } from './pages/Reports';
 import { AdminUsers } from './pages/AdminUsers';
+import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,6 +45,18 @@ const AppRoutes = () => {
       <Route path="/admin/users" element={
         <ProtectedRoute>
           <AdminUsers />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/admin/users" element={
+        <ProtectedRoute>
+          <AdminUsers />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
         </ProtectedRoute>
       } />
 

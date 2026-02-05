@@ -119,14 +119,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             )}
 
-            {/* Theme Toggle in Menu for Mobile/Desktop */}
-            <button
-              onClick={toggleDarkMode}
-              className="flex lg:hidden items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold"
+            <Link
+              to="/settings"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-semibold ${isActive('/settings')
+                ? 'bg-pastel-sky dark:bg-slate-800 text-primary'
+                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
             >
-              <span className="material-icons-round">dark_mode</span>
-              Alternar Tema
-            </button>
+              <span className="material-icons-round">settings</span>
+              Configurações
+            </Link>
+
+            {/* Theme Toggle removed from here as moved to header */}
           </nav>
 
           <div className="mt-auto space-y-4">

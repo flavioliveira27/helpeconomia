@@ -6,6 +6,8 @@ import userRoutes from './routes/users.js';
 import transactionRoutes from './routes/transactions.js';
 import aiRoutes from './routes/ai.js';
 
+import profileRoutes from './routes/profile.js';
+
 dotenv.config();
 
 const app = express();
@@ -23,6 +25,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
 

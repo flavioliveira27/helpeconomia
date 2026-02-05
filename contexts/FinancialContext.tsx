@@ -18,6 +18,7 @@ interface FinancialContextType {
   addUser: (name: string, email: string, role: 'ADMIN' | 'USER', password: string) => Promise<void>;
   updateUser: (id: number, data: Partial<Omit<User, 'id'>>) => Promise<void>;
   removeUser: (id: number) => Promise<void>;
+  refreshUser: () => Promise<void>;
   addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>;
   updateTransaction: (id: number, t: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
@@ -52,6 +53,15 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     localStorage.setItem('selectedMonth', selectedMonth.toString());
     localStorage.setItem('selectedYear', selectedYear.toString());
   }, [selectedMonth, selectedYear]);
+
+  const refreshUser = async () => {
+    try {
+      const currentUser = await apiService.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
 
   // Check for existing session on mount
   useEffect(() => {
@@ -303,6 +313,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       addUser,
       updateUser,
       removeUser,
+      refreshUser,
       addTransaction,
       updateTransaction,
       deleteTransaction,

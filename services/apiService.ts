@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 class ApiService {
     constructor() {
@@ -67,6 +67,13 @@ class ApiService {
 
     logout() {
         this.setToken(null);
+    }
+
+    async updateProfile(data: { name?: string; currentPassword?: string; newPassword?: string }) {
+        return this.request('/api/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
     }
 
     // Users
