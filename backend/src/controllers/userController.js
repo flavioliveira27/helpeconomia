@@ -105,3 +105,57 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ error: 'Erro ao excluir usuário' });
     }
 };
+
+// Update own profile
+export const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { name, currentPassword, newPassword } = req.body;
+
+        if (!name && !newPassword) {
+            return res.status(400).json({ error: 'Nenhum dado para atualizar' });
+        }
+
+        // Get current user to verify password if needed
+        const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+        const user = users[0];
+
+        // Verify current password if changing to a new one
+        if (newPassword) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Senha atual é obrigatória para alterar a senha' });
+            }
+            // In production, use bcrypt.compare here
+            if (user.password !== currentPassword) {
+                return res.status(400).json({ error: 'Senha atual incorreta' });
+            }
+        }
+
+        const updates = [];
+        const values = [];
+
+        if (name) {
+            updates.push('name = ?');
+            values.push(name);
+        }
+        if (newPassword) {
+            updates.push('password = ?');
+            values.push(newPassword);
+        }
+
+        values.push(userId);
+
+        await db.query(
+            `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
+            values
+        );
+
+        res.json({ message: 'Perfil atualizado com sucesso' });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ error: 'Erro ao atualizar perfil' });
+    }
+};
