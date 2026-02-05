@@ -128,8 +128,8 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* AI Section */}
-      <section className="bg-gradient-to-r from-pastel-sky to-pastel-purple dark:from-indigo-900/40 dark:to-purple-900/40 p-8 rounded-2xl border border-blue-100 dark:border-indigo-800 relative overflow-hidden transition-all">
+      {/* AI Section - Hidden on Mobile, Visible on Desktop (lg+) */}
+      <section className="hidden lg:block bg-gradient-to-r from-pastel-sky to-pastel-purple dark:from-indigo-900/40 dark:to-purple-900/40 p-8 rounded-2xl border border-blue-100 dark:border-indigo-800 relative overflow-hidden transition-all">
         <div className="relative z-10 flex flex-col items-start gap-6 w-full">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8 w-full">
             <div className="bg-white dark:bg-slate-800 p-4 rounded-full shadow-xl shadow-blue-100 dark:shadow-none shrink-0 text-center md:text-left">
@@ -181,7 +181,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Summary Cards */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
+        <div className="order-2 md:order-none bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
           <div className="flex justify-between items-start mb-4">
             <p className="text-slate-500 dark:text-slate-400 font-medium">Receitas</p>
             <div className="bg-pastel-mint dark:bg-teal-900/30 p-3 rounded-2xl text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform">
@@ -194,7 +194,7 @@ export const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
+        <div className="order-3 md:order-none bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
           <div className="flex justify-between items-start mb-4">
             <p className="text-slate-500 dark:text-slate-400 font-medium">Despesas</p>
             <div className="bg-pastel-coral dark:bg-rose-900/30 p-3 rounded-2xl text-rose-500 dark:text-rose-400 group-hover:scale-110 transition-transform">
@@ -207,7 +207,7 @@ export const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
+        <div className="order-4 md:order-none bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all group">
           <div className="flex justify-between items-start mb-4">
             <p className="text-slate-500 dark:text-slate-400 font-medium">Investimentos</p>
             <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-2xl text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
@@ -220,7 +220,7 @@ export const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-white to-pastel-mint dark:from-slate-900 dark:to-teal-900/10">
+        <div className="order-1 md:order-none bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br from-white to-pastel-mint dark:from-slate-900 dark:to-teal-900/10">
           <p className="text-slate-500 dark:text-slate-400 font-medium mb-4 text-center">Saldo em Caixa</p>
           <p className={`text-4xl font-extrabold text-center drop-shadow-sm ${summary.balance >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {formatMoney(summary.balance)}
@@ -231,8 +231,8 @@ export const Dashboard: React.FC = () => {
               style={{ width: `${summary.totalIncome > 0 ? Math.min(100, Math.max(0, (summary.balance / summary.totalIncome) * 100)) : 0}%` }}
             ></div>
           </div>
-          <p className="text-[10px] text-center mt-2 text-slate-400 font-bold uppercase tracking-widest">
-            {summary.balance >= 0 ? 'Saldo Positivo' : 'Saldo Negativo'}
+          <p className="text-[10px] text-center mt-2 text-slate-400 font-bold uppercase tracking-widest min-h-[15px]">
+            {summary.balance > 0 ? 'Saldo Positivo' : summary.balance < 0 ? 'Saldo Negativo' : 'Saldo Zerado'}
           </p>
         </div>
       </section>

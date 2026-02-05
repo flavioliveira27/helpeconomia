@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useFinancial } from '../../contexts/FinancialContext';
 import { Link, useLocation } from 'react-router-dom';
 import { MonthSelector } from '../ui/MonthSelector';
+import { generateFinancialInsights } from '../../services/geminiService';
+import ReactMarkdown from 'react-markdown';
 
 
 interface LayoutProps {
@@ -9,9 +11,26 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout, selectedMonth, selectedYear, setSelectedMonth } = useFinancial();
+  const { user, logout, selectedMonth, selectedYear, setSelectedMonth, filteredTransactions } = useFinancial();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // AI State
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [aiInsight, setAiInsight] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  const handleGenerateInsight = async () => {
+    setAiLoading(true);
+    const result = await generateFinancialInsights(filteredTransactions);
+    setAiInsight(result);
+    setAiLoading(false);
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -105,6 +124,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               Relatórios
             </Link>
 
+            {/* Mobile Only: AI Assistant Button */}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsAIModalOpen(true);
+              }}
+              className="lg:hidden flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 w-full text-left"
+            >
+              <span className="material-icons-round text-primary">auto_awesome</span>
+              Assistente IA
+            </button>
+
             {user?.role === 'ADMIN' && (
               <Link
                 to="/admin/users"
@@ -161,6 +192,70 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
-    </div>
+
+      {/* Mobile AI Modal */}
+      {
+        isAIModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in lg:hidden">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-pastel-sky/20 to-pastel-purple/20">
+                <div className="flex items-center gap-2">
+                  <span className="material-icons-round text-primary text-xl">auto_awesome</span>
+                  <h3 className="font-bold text-lg">Consultor IA Smart</h3>
+                </div>
+                <button
+                  onClick={() => setIsAIModalOpen(false)}
+                  className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                >
+                  <span className="material-icons-round">close</span>
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto flex-1">
+                {!aiInsight && !aiLoading && (
+                  <div className="text-center py-8">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                      <span className="material-icons-round text-3xl">psychology</span>
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">Análise Financeira</h4>
+                    <p className="text-slate-500 dark:text-slate-400 mb-6">
+                      Gere insights inteligentes baseados nas suas transações de {months[selectedMonth]}.
+                    </p>
+                    <button
+                      onClick={handleGenerateInsight}
+                      className="bg-primary hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 dark:shadow-none transition-all w-full"
+                    >
+                      Gerar Análise
+                    </button>
+                  </div>
+                )}
+
+                {aiLoading && (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <span className="material-icons-round text-4xl text-primary animate-spin">refresh</span>
+                    <p className="text-slate-500 font-medium">Analisando suas finanças...</p>
+                  </div>
+                )}
+
+                {aiInsight && !aiLoading && (
+                  <div className="prose prose-sm max-w-none text-slate-700 dark:text-slate-300">
+                    <ReactMarkdown>{aiInsight}</ReactMarkdown>
+
+                    <button
+                      onClick={handleGenerateInsight}
+                      className="mt-8 w-full py-3 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="material-icons-round">refresh</span>
+                      Regerar Análise
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+    </div >
   );
 };

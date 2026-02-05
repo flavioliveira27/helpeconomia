@@ -245,17 +245,17 @@ export const Reports: React.FC = () => {
           </div>
           <button
             onClick={handleExportExcel}
-            className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-medium text-sm shadow-sm"
+            className="flex items-center justify-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-4 py-2.5 rounded-xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-medium text-sm shadow-sm flex-1 md:flex-none"
           >
             <Download size={18} />
-            <span className="hidden sm:inline">Exportar Excel</span>
+            <span>Excel</span>
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-medium text-sm shadow-sm"
+            className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-medium text-sm shadow-sm flex-1 md:flex-none"
           >
             <Printer size={18} />
-            <span className="hidden sm:inline">Imprimir PDF</span>
+            <span>PDF</span>
           </button>
 
           <div className="hidden lg:block">
@@ -603,7 +603,9 @@ export const Reports: React.FC = () => {
               <p className="text-sm text-slate-600 dark:text-blue-200 leading-relaxed">
                 {summary.balance > 0
                   ? "Parabéns! Seu saldo está positivo neste mês. Considere aumentar seus aportes em investimentos."
-                  : "Atenção! Seus gastos superaram seus ganhos. Revise os itens supérfluos para equilibrar as contas."}
+                  : summary.balance < 0
+                    ? "Atenção! Seus gastos superaram seus ganhos. Revise os itens supérfluos para equilibrar as contas."
+                    : "Comece adicionando suas receitas e despesas para receber dicas financeiras personalizadas."}
               </p>
             </div>
 
