@@ -7,7 +7,6 @@
   <title>HelpEconomia</title>
   <link rel="icon" type="image/png" href="/favicon.png?v=2" />
   <link rel="apple-touch-icon" href="/logo.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap"
@@ -16,122 +15,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            primary: "#3B82F6",
-            "background-light": "#F8FAFC",
-            "background-dark": "#0F172A",
-            pastel: {
-              mint: "#E6FFFA",
-              "mint-dark": "#81E6D9",
-              coral: "#FFF5F5",
-              "coral-dark": "#FEB2B2",
-              sky: "#EBF8FF",
-              "sky-dark": "#90CDF4",
-              purple: "#FAF5FF",
-              "purple-dark": "#D6BCFA",
-              gray: "#F1F5F9"
-            },
-            // Manter cores anteriores para compatibilidade
-            secondary: '#334155',
-            accent: '#3b82f6',
-            success: '#10b981',
-            danger: '#ef4444',
-          },
-          fontFamily: {
-            display: ["Outfit", "sans-serif"],
-            sans: ["Outfit", "sans-serif", "Inter"], // Prioritizar Outfit
-          },
-          borderRadius: {
-            DEFAULT: "1rem",
-            "xl": "1.5rem",
-            "2xl": "2rem",
-          },
-        },
-      },
-    };
-  </script>
-  <style>
-    /* Custom scrollbar for spreadsheet feel */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    @media print {
-      @page {
-        margin: 1cm;
-        size: portrait;
-      }
-
-
-      body {
-        background: white;
-        -webkit-print-color-adjust: exact;
-      }
-
-      aside,
-      header,
-      .no-print {
-        display: none !important;
-      }
-
-      main {
-        margin: 0;
-        padding: 0;
-        overflow: visible;
-        height: auto;
-      }
-
-      #root {
-        height: auto;
-        overflow: visible;
-      }
-
-      .shadow-sm,
-      .shadow-lg {
-        box-shadow: none !important;
-        border: 1px solid #ddd;
-      }
-
-      .text-white {
-        color: black !important;
-      }
-
-      .bg-accent {
-        background-color: #eee !important;
-        color: black !important;
-      }
-    }
-
-    /* Hide number input spinners */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-  </style>
   <script type="importmap">
 {
   "imports": {

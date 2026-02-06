@@ -97,15 +97,13 @@ const LoginForm = () => {
       {/* New Background Structure */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50 dark:from-[#020617] dark:via-[#0f172a] dark:to-[#1e1b4b]"></div>
-        <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-blue-600/10 dark:bg-blue-600/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-violet-600/10 dark:bg-violet-600/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-100"></div>
-        <div className="absolute top-[30%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
-        <div className="absolute bottom-[20%] right-0 w-2/3 h-[1px] bg-gradient-to-l from-transparent via-purple-500/20 to-transparent rotate-12"></div>
-        <div className="absolute top-[60%] -left-[10%] w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/10 to-transparent -rotate-6"></div>
-        <div className="absolute top-1/4 left-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full blur-[1px] animate-float shadow-[0_0_10px_rgba(96,165,250,0.8)]"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-violet-400 rounded-full blur-[1px] animate-float-delayed shadow-[0_0_15px_rgba(167,139,250,0.8)]"></div>
-        <div className="absolute top-1/2 right-[10%] w-1 h-1 bg-indigo-400 rounded-full blur-[0.5px] opacity-70 animate-float" style={{ animationDuration: '7s' }}></div>
+        {/* Simplified Background for Mobile Performance */}
+        <div className="absolute top-[-10%] left-[-10%] w-[20rem] md:w-[40rem] h-[20rem] md:h-[40rem] bg-blue-600/10 dark:bg-blue-600/20 rounded-full blur-3xl md:blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow will-change-transform"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[20rem] md:w-[40rem] h-[20rem] md:h-[40rem] bg-violet-600/10 dark:bg-violet-600/20 rounded-full blur-3xl md:blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow will-change-transform" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-50 md:opacity-100"></div>
+        {/* Reduced decorative elements */}
+        <div className="hidden md:block absolute top-[30%] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+        <div className="hidden md:block absolute bottom-[20%] right-0 w-2/3 h-[1px] bg-gradient-to-l from-transparent via-purple-500/20 to-transparent rotate-12"></div>
       </div>
 
       {/* Main Card */}
