@@ -13,11 +13,23 @@ CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(255), -- Nullable for Google Auth users
   role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
+  
+  -- Monetization & Auth Fields
+  subscription_status ENUM('active', 'inactive', 'trial', 'canceled') DEFAULT 'trial',
+  subscription_id VARCHAR(255), -- Kiwify ID
+  trial_ends_at DATETIME,
+  google_id VARCHAR(255),
+  photo_url VARCHAR(500),
+  reset_token VARCHAR(255),
+  reset_token_expires DATETIME,
+  
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_email (email)
+  INDEX idx_email (email),
+  INDEX idx_google_id (google_id),
+  INDEX idx_subscription (subscription_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabela de Transações

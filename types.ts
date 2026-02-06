@@ -40,6 +40,9 @@ export interface User {
   email: string;
   password?: string; // Added for authentication logic
   role: 'ADMIN' | 'USER';
+  photo_url?: string;
+  subscription_status?: 'active' | 'inactive' | 'trial' | 'canceled';
+  trial_ends_at?: string;
 }
 
 export interface FinancialSummary {

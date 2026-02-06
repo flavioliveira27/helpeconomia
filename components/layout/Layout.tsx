@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { MonthSelector } from '../ui/MonthSelector';
 import { generateFinancialInsights } from '../../services/geminiService';
 import ReactMarkdown from 'react-markdown';
+import { formatUserName } from '../../utils/formatters';
 
 
 interface LayoutProps {
@@ -167,11 +168,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <div className="mt-auto space-y-4">
             <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl transition-colors">
-              <div className="w-10 h-10 bg-pastel-mint dark:bg-teal-900 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-300 font-bold">
-                {user?.name.charAt(0)}
-              </div>
+              {user?.photo_url ? (
+                <img src={user.photo_url} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 bg-pastel-mint dark:bg-teal-900 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-300 font-bold">
+                  {user?.name.charAt(0)}
+                </div>
+              )}
               <div className="overflow-hidden">
-                <p className="text-sm font-bold truncate">{user?.name}</p>
+                <p className="text-sm font-bold truncate">{formatUserName(user?.name || '')}</p>
                 <p className="text-xs text-slate-500">{user?.role === 'ADMIN' ? 'Administrador' : 'Usuário'}</p>
               </div>
             </div>

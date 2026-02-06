@@ -39,7 +39,10 @@ class ApiService {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Erro na requisição');
+                const errorObj: any = new Error(data.error || 'Erro na requisição');
+                errorObj.code = data.code;
+                errorObj.user = data.user; // To pass user info even on error (e.g. for subscription page)
+                throw errorObj;
             }
 
             return data;
@@ -61,6 +64,17 @@ class ApiService {
         return data;
     }
 
+    async googleLogin(token) {
+        const data = await this.request('/api/auth/google', {
+            method: 'POST',
+            body: JSON.stringify({ token }),
+        });
+        if (data.token) {
+            this.setToken(data.token);
+        }
+        return data;
+    }
+
     async getCurrentUser() {
         return this.request('/api/auth/me');
     }
@@ -74,6 +88,17 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify(data),
         });
+    }
+
+    async registerUser(userData: any) {
+        const data = await this.request('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+        });
+        if (data.token) {
+            this.setToken(data.token);
+        }
+        return data;
     }
 
     // Users
@@ -140,6 +165,21 @@ class ApiService {
 
     async getSummary() {
         return this.request('/api/transactions/summary');
+    }
+
+    // Password Reset
+    async forgotPassword(email: string) {
+        return this.request('/api/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    }
+
+    async resetPassword(token: string, newPassword: string) {
+        return this.request('/api/auth/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({ token, newPassword }),
+        });
     }
 }
 
