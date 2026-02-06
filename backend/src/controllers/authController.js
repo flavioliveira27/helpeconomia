@@ -234,7 +234,7 @@ export const forgotPassword = async (req, res) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
         const resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
 
-        await db.query('UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?', [resetToken, resetPasswordExpires, user.id]);
+        await db.query('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [resetToken, resetPasswordExpires, user.id]);
 
         await sendPasswordResetEmail(user.email, resetToken);
 
@@ -248,7 +248,7 @@ export const forgotPassword = async (req, res) => {
 export const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
     try {
-        const [users] = await db.query('SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()', [token]);
+        const [users] = await db.query('SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW()', [token]);
 
         if (users.length === 0) {
             return res.status(400).json({ error: 'Token inválido ou expirado' });
@@ -256,7 +256,7 @@ export const resetPassword = async (req, res) => {
         const user = users[0];
 
         // Updating password (plain text as per current system, strictly should be hashed)
-        await db.query('UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?', [newPassword, user.id]);
+        await db.query('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [newPassword, user.id]);
 
         res.json({ message: 'Senha alterada com sucesso' });
     } catch (error) {
