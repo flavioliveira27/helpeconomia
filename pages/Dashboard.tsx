@@ -411,7 +411,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Floating WhatsApp Support Button */}
       <a
-        href="https://wa.me/message/4OZZDQTHZIRJI1?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
+        href="https://wa.me/message/4OZZDQTHZIRJI1"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group"
