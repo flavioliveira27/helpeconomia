@@ -27,30 +27,40 @@
     margin: 1cm;
     size: portrait;
   }
+
   body {
     background: white;
     -webkit-print-color-adjust: exact;
   }
-  aside, header, .no-print {
+
+  aside,
+  header,
+  .no-print {
     display: none !important;
   }
+
   main {
     margin: 0;
     padding: 0;
     overflow: visible;
     height: auto;
   }
+
   #root {
     height: auto;
     overflow: visible;
   }
-  .shadow-sm, .shadow-lg {
+
+  .shadow-sm,
+  .shadow-lg {
     box-shadow: none !important;
     border: 1px solid #ddd;
   }
+
   .text-white {
     color: black !important;
   }
+
   .bg-accent {
     background-color: #eee !important;
     color: black !important;
@@ -58,11 +68,12 @@
 }
 
 /* Hide number input spinners */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
-  margin: 0; 
+  margin: 0;
 }
+
 input[type=number] {
   -moz-appearance: textfield;
 }
