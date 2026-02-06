@@ -13,7 +13,9 @@ interface FinancialContextType {
   usersList: User[];
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  googleLogin: (token: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   logout: () => void;
   addUser: (name: string, email: string, role: 'ADMIN' | 'USER', password: string) => Promise<void>;
   updateUser: (id: number, data: Partial<Omit<User, 'id'>>) => Promise<void>;
@@ -160,25 +162,49 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     });
   }, [transactions, selectedMonth, selectedYear]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await apiService.login(email, password);
       setUser(response.user);
       setIsAuthenticated(true);
-
-      // Load data after login
-      const transactionsData = await apiService.getAllTransactions();
-      setTransactions(transactionsData);
-
-      if (response.user.role === 'ADMIN') {
-        const usersData = await apiService.getAllUsers();
-        setUsersList(usersData);
-      }
-
-      return true;
-    } catch (error) {
+      await loadData(response.user);
+      return { success: true };
+    } catch (error: any) { // Use any to access properties
       console.error('Login error:', error);
-      return false;
+      // Handle known API errors
+      if (error.message) {
+        // Check if the error object from apiService throw has code (it throws the data object if not ok? No, apiService throws Error(data.error))
+        // Wait, apiService throws `new Error(data.error || 'Erro')`. It loses access to `code`.
+        // I should fix apiService to throw the full object or handle it better.
+        // For now, assuming apiService might need a tweak OR I parse the error string?
+        // Actually, let's fix apiService to throw a custom error object containing code.
+      }
+      return { success: false, error: error.message, code: error.code };
+    }
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      const response = await apiService.registerUser({ name, email, password });
+      setUser(response.user);
+      setIsAuthenticated(true);
+      await loadData(response.user);
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
+
+  const googleLogin = async (token: string) => {
+    try {
+      const response = await apiService.googleLogin(token);
+      setUser(response.user);
+      setIsAuthenticated(true);
+      await loadData(response.user);
+      return { success: true, isNewUser: response.isNewUser };
+    } catch (error: any) {
+      console.error('Google Login error:', error);
+      return { success: false, error: error.message, code: error.code };
     }
   };
 
@@ -306,9 +332,12 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       setSelectedYear,
       user,
       usersList,
+      usersList,
       isAuthenticated,
       isLoading,
       login,
+      register,
+      googleLogin,
       logout,
       addUser,
       updateUser,

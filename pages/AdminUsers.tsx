@@ -169,6 +169,8 @@ export const AdminUsers: React.FC = () => {
                                 <th className="px-6 py-3 text-slate-500 font-medium text-sm">Email</th>
                                 <th className="px-6 py-3 text-slate-500 font-medium text-sm">Senha</th>
                                 <th className="px-6 py-3 text-slate-500 font-medium text-sm">Perfil</th>
+                                <th className="px-6 py-3 text-slate-500 font-medium text-sm">Assinatura</th>
+                                <th className="px-6 py-3 text-slate-500 font-medium text-sm">Trial</th>
                                 <th className="px-6 py-3 text-right text-slate-500 font-medium text-sm">Ações</th>
                             </tr>
                         </thead>
@@ -192,6 +194,20 @@ export const AdminUsers: React.FC = () => {
                                             }`}>
                                             {user.role === 'ADMIN' ? 'Admin' : 'Comum'}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.subscription_status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                                                user.subscription_status === 'trial' ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-rose-100 text-rose-700'
+                                            }`}>
+                                            {user.subscription_status === 'active' ? 'Ativo' :
+                                                user.subscription_status === 'trial' ? 'Teste' :
+                                                    user.subscription_status === 'inactive' ? 'Inativo' :
+                                                        user.subscription_status === 'canceled' ? 'Cancelado' : '-'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 text-sm whitespace-nowrap">
+                                        {user.trial_ends_at ? new Date(user.trial_ends_at).toLocaleDateString('pt-BR') : '-'}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">

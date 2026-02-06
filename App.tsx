@@ -8,6 +8,12 @@ import { Reports } from './pages/Reports';
 import { AdminUsers } from './pages/AdminUsers';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Subscription } from './pages/Subscription';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
+import { TrialSuccess } from './pages/TrialSuccess';
+
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useFinancial();
@@ -23,6 +29,11 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/subscription" element={<Subscription />} />
+      <Route path="/trial-started" element={<TrialSuccess />} />
 
       <Route path="/" element={
         <ProtectedRoute>

@@ -5,7 +5,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import transactionRoutes from './routes/transactions.js';
 import aiRoutes from './routes/ai.js';
-
+import webhookRoutes from './routes/webhooks.js';
 import profileRoutes from './routes/profile.js';
 
 dotenv.config();
@@ -28,6 +28,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
