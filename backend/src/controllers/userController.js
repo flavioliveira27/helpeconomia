@@ -4,7 +4,7 @@ import db from '../config/database.js';
 export const getAllUsers = async (req, res) => {
     try {
         const [users] = await db.query(
-            'SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC'
+            'SELECT id, name, email, role, subscription_status, trial_ends_at, photo_url, created_at FROM users ORDER BY created_at DESC'
         );
         res.json(users);
     } catch (error) {
@@ -67,6 +67,23 @@ export const updateUser = async (req, res) => {
         if (role) {
             updates.push('role = ?');
             values.push(role);
+        }
+        if (req.body.subscription_status) {
+            updates.push('subscription_status = ?');
+            values.push(req.body.subscription_status);
+        }
+        if (req.body.trial_ends_at !== undefined) {
+            // Allow null for trial_ends_at
+            let trialDate = req.body.trial_ends_at;
+            if (trialDate) {
+                // Convert ISO string or Date to MySQL format 'YYYY-MM-DD HH:MM:SS'
+                const d = new Date(trialDate);
+                if (!isNaN(d.getTime())) {
+                    trialDate = d.toISOString().slice(0, 19).replace('T', ' ');
+                }
+            }
+            updates.push('trial_ends_at = ?');
+            values.push(trialDate);
         }
 
         if (updates.length === 0) {

@@ -123,16 +123,15 @@ const LoginForm = () => {
         <div className="space-y-5">
           {/* Google Login - Centered and Styled */}
           <div className="flex justify-center w-full">
-            <div className="w-full">
+            <div className="w-full flex justify-center">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError('Login failed')}
-                theme="outline"
+                theme="filled_blue"
                 size="large"
-                width="100%"
                 text="signin_with"
                 shape="pill"
-                logo_alignment="center"
+                logo_alignment="left"
               />
             </div>
           </div>
