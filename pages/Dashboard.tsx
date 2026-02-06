@@ -409,6 +409,33 @@ export const Dashboard: React.FC = () => {
       </div>
 
 
+      {/* Floating WhatsApp Support Button */}
+      <a
+        href="https://wa.me/message/4OZZDQTHZIRJI1?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20uma%20d%C3%BAvida.%20Pode%20me%20ajudar%3F"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group"
+        title="Falar com Suporte"
+      >
+        <div className="absolute opacity-0 group-hover:opacity-100 right-full mr-3 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity pointer-events-none">
+          Falar com Suporte
+        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="fill-current"
+        >
+          <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+          <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+        </svg>
+      </a>
     </>
   );
 };
