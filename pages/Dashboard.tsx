@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFinancial } from '../contexts/FinancialContext';
 import { TransactionType } from '../types';
+import { CATEGORY_THEMES } from '../constants';
 import { Link } from 'react-router-dom';
 import { generateFinancialInsights } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
@@ -83,30 +84,7 @@ export const Dashboard: React.FC = () => {
   };
 
   const getCategoryTheme = (category: string) => {
-    const themes: Record<string, string> = {
-      'Salário': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      'Extras': 'bg-teal-100 text-teal-800 border-teal-200',
-      'Renda Fixa': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Renda Variável': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-      'Moradia': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-      'Contas': 'bg-red-100 text-red-800 border-red-200',
-      'Saúde': 'bg-rose-100 text-rose-800 border-rose-200',
-      'Educação': 'bg-violet-100 text-violet-800 border-violet-200',
-      'Alimentação': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Transporte': 'bg-amber-100 text-amber-800 border-amber-200',
-      'Lazer': 'bg-pink-100 text-pink-800 border-pink-200',
-      'Outros': 'bg-slate-100 text-slate-800 border-slate-200',
-      // Novos Investimentos
-      'Reserva de Emergência': 'bg-sky-100 text-sky-800 border-sky-200',
-      'Meta': 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
-      'Investimento Fixo': 'bg-blue-50 text-blue-900 border-blue-200',
-      'Criptomoeda': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'Fundo Cambial': 'bg-emerald-50 text-emerald-900 border-emerald-200',
-      'Poupança': 'bg-lime-100 text-lime-800 border-lime-200',
-      'Reserva Geral': 'bg-slate-200 text-slate-800 border-slate-300',
-      'Doação': 'bg-rose-50 text-rose-900 border-rose-200',
-    };
-    return themes[category] || themes['Outros'];
+    return CATEGORY_THEMES[category] || CATEGORY_THEMES['Outros'];
   };
 
   return (

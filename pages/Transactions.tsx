@@ -36,7 +36,7 @@ export const Transactions: React.FC = () => {
         {/* Block 1: Income */}
         <div className="w-full">
           <TransactionBlock
-            title="Entradas"
+            title="Receitas"
             filterTypes={[TransactionType.INCOME]}
             colorClass="bg-emerald-100"
           />

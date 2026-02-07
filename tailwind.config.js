@@ -7,7 +7,8 @@ export default {
         "./components/**/*.{js,ts,jsx,tsx}",
         "./contexts/**/*.{js,ts,jsx,tsx}",
         "./App.tsx",
-        "./index.tsx"
+        "./index.tsx",
+        "./constants.ts"
     ],
     darkMode: "class",
     theme: {
@@ -44,4 +45,10 @@ export default {
         },
     },
     plugins: [],
+    safelist: [
+        {
+            pattern: /(bg|text|border)-(emerald|teal|purple|sky|indigo|cyan|red|violet|orange|pink|rose|amber|green|slate|blue|yellow|fuchsia|lime)-(50|100|200|300|400|500|600|700|800|900)/,
+            variants: ['hover', 'dark', 'group-hover'],
+        },
+    ],
 }

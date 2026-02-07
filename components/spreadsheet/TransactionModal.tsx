@@ -23,8 +23,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     showExtraColumns,
     title
 }) => {
+    const getLocalDate = () => {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const [formData, setFormData] = useState<Partial<Transaction>>({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDate(),
         description: '',
         amount: 0,
         category: 'Outros',
@@ -43,7 +51,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             if (initialData) {
                 setFormData({
                     ...initialData,
-                    date: initialData.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0],
+                    date: initialData.date ? initialData.date.split('T')[0] : getLocalDate(),
                     description: initialData.description ? initialData.description.replace(/\s\(\d+\/\d+\)$/, '') : '',
                     paymentMethod: initialData.paymentMethod || undefined,
                     importance: initialData.importance || undefined,
@@ -58,7 +66,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 }
             } else {
                 setFormData({
-                    date: new Date().toISOString().split('T')[0],
+                    date: getLocalDate(),
                     description: '',
                     amount: 0,
                     category: 'Outros',
@@ -85,7 +93,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }, [installmentValue, formData.installments, formData.paymentMethod]);
 
     // Helper to safely parse
-    // Helper to safely parse
     const parsedVal = (v: any) => parseFloat(v) || 0;
 
     // Helper to format currency input (BRL)
@@ -111,25 +118,25 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title}>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Data</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Data</label>
                     <input
                         type="date"
                         required
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm dark:[color-scheme:dark]"
                         value={formData.date}
                         onChange={e => setFormData({ ...formData, date: e.target.value })}
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Descrição</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Descrição</label>
                     <input
                         type="text"
                         required
                         placeholder="Ex: Compras no mercado"
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                     />
@@ -138,17 +145,23 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 {showExtraColumns && (
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Forma de Pagamento</label>
-                            <select
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.paymentMethod || ''}
-                                onChange={e => setFormData({ ...formData, paymentMethod: e.target.value as TransactionPaymentMethod })}
-                            >
-                                <option value="" disabled>Selecione</option>
-                                {Object.values(TransactionPaymentMethod).map(m => (
-                                    <option key={m} value={m}>{m}</option>
-                                ))}
-                            </select>
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Forma de Pagamento</label>
+                            <div className="relative">
+                                <select
+                                    required
+                                    className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm appearance-none cursor-pointer"
+                                    value={formData.paymentMethod || ''}
+                                    onChange={e => setFormData({ ...formData, paymentMethod: e.target.value as TransactionPaymentMethod })}
+                                >
+                                    <option value="" disabled>Selecione</option>
+                                    {Object.values(TransactionPaymentMethod).map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span className="material-icons-round text-slate-400">expand_more</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -157,10 +170,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 {isCreditInstallments ? (
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Valor da Parcela</label>
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Valor da Parcela</label>
                             <input
                                 type="text"
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                                pattern="^(?!0,00$).*"
+                                title="O valor da parcela deve ser maior que zero"
+                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm"
                                 value={formatCurrencyInput(installmentValue)}
                                 onChange={e => {
                                     const val = parseCurrencyInput(e.target.value);
@@ -170,29 +186,32 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Parcelas</label>
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Parcelas</label>
                             <input
                                 type="number"
+                                required
                                 min="1"
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                title="Informe o número de parcelas"
+                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm"
                                 value={formData.installments || ''}
                                 onChange={e => setFormData({ ...formData, installments: parseInt(e.target.value) || undefined })}
                             />
                         </div>
                     </div>
                 ) : (
-                    // Standard Value Input (hidden if credit installments layout is active above, but we show Total separately below)
                     <></>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-700">Valor Total (R$)</label>
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Valor Total (R$)</label>
                         <input
                             type="text"
                             required
+                            pattern="^(?!0,00$).*"
+                            title="O valor deve ser maior que zero"
                             readOnly={isCreditInstallments}
-                            className={`w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isCreditInstallments ? 'bg-slate-100 text-slate-500' : ''}`}
+                            className={`w-full rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm ${isCreditInstallments ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' : 'bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100'}`}
                             value={formatCurrencyInput(formData.amount)}
                             onChange={e => {
                                 const val = parseCurrencyInput(e.target.value);
@@ -202,60 +221,71 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-700">Categoria</label>
-                        <select
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={formData.category}
-                            onChange={e => setFormData({ ...formData, category: e.target.value })}
-                        >
-                            {(type === TransactionType.INVESTMENT
-                                ? INVESTMENT_CATEGORIES
-                                : type === TransactionType.INCOME
-                                    ? INCOME_CATEGORIES
-                                    : type === TransactionType.FIXED_EXPENSE
-                                        ? FIXED_EXPENSE_CATEGORIES
-                                        : VARIABLE_EXPENSE_CATEGORIES
-                            ).map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Categoria</label>
+                        <div className="relative">
+                            <select
+                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm appearance-none cursor-pointer"
+                                value={formData.category}
+                                onChange={e => setFormData({ ...formData, category: e.target.value })}
+                            >
+                                {(type === TransactionType.INVESTMENT
+                                    ? INVESTMENT_CATEGORIES
+                                    : type === TransactionType.INCOME
+                                        ? INCOME_CATEGORIES
+                                        : type === TransactionType.FIXED_EXPENSE
+                                            ? FIXED_EXPENSE_CATEGORIES
+                                            : VARIABLE_EXPENSE_CATEGORIES
+                                ).map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span className="material-icons-round text-slate-400">expand_more</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {showExtraColumns && (
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-700">Importância</label>
-                        <select
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={formData.importance || ''}
-                            onChange={e => setFormData({ ...formData, importance: e.target.value as TransactionImportance })}
-                        >
-                            {Object.values(TransactionImportance).map(i => (
-                                <option key={i} value={i}>
-                                    {i === TransactionImportance.SUPERFLUOUS ? 'SUPÉRFLUO' : i}
-                                </option>
-                            ))}
-                        </select>
+                        <label className="text-sm font-bold text-slate-700 dark:text-slate-200">Importância</label>
+                        <div className="relative">
+                            <select
+                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm appearance-none cursor-pointer"
+                                value={formData.importance || ''}
+                                onChange={e => setFormData({ ...formData, importance: e.target.value as TransactionImportance })}
+                            >
+                                {Object.values(TransactionImportance).map(i => (
+                                    <option key={i} value={i}>
+                                        {i === TransactionImportance.SUPERFLUOUS ? 'SUPÉRFLUO' : i}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span className="material-icons-round text-slate-400">expand_more</span>
+                            </div>
+                        </div>
                         {isCreditInstallments && (
-                            <p className="text-xs text-amber-600 mt-1">
+                            <p className="text-xs text-amber-600 mt-1 font-medium">
                                 * A primeira parcela será cobrada e somada apenas no próximo mês.
                             </p>
                         )}
                     </div>
                 )}
 
-                {/* Recurring Checkbox - Only for Fixed Expenses */}
                 {/* Recurring Checkbox - For Fixed Expenses and Investments */}
                 {(type === TransactionType.FIXED_EXPENSE || type === TransactionType.INVESTMENT) && (
-                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer" onClick={() => setFormData({ ...formData, recurring: !formData.recurring })}>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.recurring ? 'bg-primary border-primary' : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-500'}`}>
+                            {formData.recurring && <span className="material-icons-round text-white text-sm">check</span>}
+                        </div>
                         <input
                             type="checkbox"
-                            id="recurring"
-                            className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                            className="hidden"
                             checked={Boolean(formData.recurring)}
-                            onChange={e => setFormData({ ...formData, recurring: e.target.checked })}
+                            readOnly
                         />
-                        <label htmlFor="recurring" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer select-none flex-1">
                             {type === TransactionType.INVESTMENT
                                 ? 'Investimento Recorrente? (Repetir mensalmente)'
                                 : 'Repetir mensalmente? (Despesa Recorrente)'}
@@ -263,9 +293,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </div>
                 )}
 
-                <div className="pt-4 flex justify-end gap-2">
-                    <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-                    <Button type="submit" variant="primary">Salvar</Button>
+                <div className="pt-6 flex justify-end gap-3">
+                    <Button type="button" variant="secondary" onClick={onClose} className="px-6 py-2.5">Cancelar</Button>
+                    <Button type="submit" variant="primary" className="px-8 py-2.5 shadow-lg shadow-blue-200 dark:shadow-none">Salvar</Button>
                 </div>
             </form>
         </Modal>

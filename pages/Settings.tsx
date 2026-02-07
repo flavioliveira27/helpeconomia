@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useFinancial } from '../contexts/FinancialContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { apiService } from '../services/apiService';
 import { Moon, Sun, User, Lock, Save, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const Settings: React.FC = () => {
     const { user, refreshUser } = useFinancial();
+    const { darkMode, setTheme } = useTheme();
     const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'appearance'>('appearance');
 
     // Profile State
@@ -55,14 +57,6 @@ export const Settings: React.FC = () => {
         }
     };
 
-    const toggleTheme = (theme: 'light' | 'dark') => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
-
     return (
         <div className="max-w-4xl mx-auto space-y-8">
             <div>
@@ -100,15 +94,19 @@ export const Settings: React.FC = () => {
                             <h2 className="text-xl font-bold mb-6">Tema do Sistema</h2>
                             <div className="grid grid-cols-2 gap-4">
                                 <button
-                                    onClick={() => toggleTheme('light')}
-                                    className="flex flex-col items-center gap-4 p-6 rounded-xl border-2 border-slate-100 hover:border-primary/50 transition-all text-slate-600 hover:text-primary bg-slate-50"
+                                    onClick={() => setTheme(false)}
+                                    className={`flex flex-col items-center gap-4 p-6 rounded-xl border-2 transition-all ${!darkMode
+                                        ? 'border-primary bg-blue-50 text-primary'
+                                        : 'border-slate-100 text-slate-600 hover:border-primary/50'}`}
                                 >
                                     <Sun size={40} />
                                     <span className="font-semibold">Modo Claro</span>
                                 </button>
                                 <button
-                                    onClick={() => toggleTheme('dark')}
-                                    className="flex flex-col items-center gap-4 p-6 rounded-xl border-2 border-slate-800 hover:border-primary/50 transition-all text-slate-400 hover:text-primary bg-slate-950"
+                                    onClick={() => setTheme(true)}
+                                    className={`flex flex-col items-center gap-4 p-6 rounded-xl border-2 transition-all ${darkMode
+                                        ? 'border-primary bg-slate-800 text-primary'
+                                        : 'border-slate-800 text-slate-400 hover:border-primary/50 bg-slate-950'}`}
                                 >
                                     <Moon size={40} />
                                     <span className="font-semibold">Modo Escuro</span>
