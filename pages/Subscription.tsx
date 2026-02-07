@@ -25,7 +25,7 @@ export const Subscription: React.FC = () => {
                     onClick={() => { logout(); navigate('/login'); }}
                     className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium transition-colors"
                 >
-                    Sair / Entrar com outra conta
+                    Sair
                 </button>
             </div>
 
