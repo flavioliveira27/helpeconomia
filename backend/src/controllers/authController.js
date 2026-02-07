@@ -1,6 +1,7 @@
 import db from '../config/database.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { sendPasswordResetEmail } from '../services/emailService.js';
 import { OAuth2Client } from 'google-auth-library';
 
@@ -31,11 +32,15 @@ export const register = async (req, res) => {
 
         const trialEnd = getTrialEndDate();
 
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         // Create user with trial status
         const [result] = await db.query(
             `INSERT INTO users (name, email, password, role, subscription_status, trial_ends_at) 
              VALUES (?, ?, ?, 'USER', 'trial', ?)`,
-            [name, email, password, trialEnd]
+            [name, email, hashedPassword, trialEnd]
         );
 
         const newUser = { id: result.insertId, name, email, role: 'USER', subscription_status: 'trial', trial_ends_at: trialEnd };
@@ -80,11 +85,12 @@ export const login = async (req, res) => {
         const user = users[0];
 
         // Only check password if user has one (Google users might not)
-        if (user.password && user.password !== password) {
-            return res.status(401).json({ error: 'Usuário ou senha inválidos' });
-        }
-
-        if (!user.password) {
+        if (user.password) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Usuário ou senha inválidos' });
+            }
+        } else {
             return res.status(401).json({ error: 'Use o login com Google para esta conta' });
         }
 

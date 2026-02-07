@@ -33,12 +33,15 @@ app.use('/api/webhooks', webhookRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(err.status || 500).json({
+        error: err.message || 'Erro interno do servidor',
+        code: err.code || 'INTERNAL_SERVER_ERROR'
+    });
 });
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(` Server running on port ${PORT}`);
     console.log(`📊 API: http://localhost:${PORT}`);
     console.log(`✅ Health: http://localhost:${PORT}/health`);
 });

@@ -76,13 +76,19 @@ const AppRoutes = () => {
   );
 };
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
+// ... (existing imports)
+
 const App: React.FC = () => {
   return (
-    <FinancialProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </FinancialProvider>
+    <ThemeProvider>
+      <FinancialProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </FinancialProvider>
+    </ThemeProvider>
   );
 };
 

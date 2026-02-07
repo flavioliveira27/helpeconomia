@@ -35,9 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const toggleDarkMode = () => {
-    document.documentElement.classList.toggle('dark');
-  };
+
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 transition-colors duration-300 min-h-screen font-sans">

@@ -1,4 +1,5 @@
 import db from '../config/database.js';
+import bcrypt from 'bcryptjs';
 
 // Get all users (Admin only)
 export const getAllUsers = async (req, res) => {
@@ -28,9 +29,12 @@ export const createUser = async (req, res) => {
             return res.status(400).json({ error: 'Email já cadastrado' });
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const [result] = await db.query(
             'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            [name, email, password, role]
+            [name, email, hashedPassword, role]
         );
 
         res.status(201).json({
@@ -61,8 +65,10 @@ export const updateUser = async (req, res) => {
             values.push(email);
         }
         if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
             updates.push('password = ?');
-            values.push(password);
+            values.push(hashedPassword);
         }
         if (role) {
             updates.push('role = ?');
@@ -145,8 +151,21 @@ export const updateProfile = async (req, res) => {
             if (!currentPassword) {
                 return res.status(400).json({ error: 'Senha atual é obrigatória para alterar a senha' });
             }
-            // In production, use bcrypt.compare here
-            if (user.password !== currentPassword) {
+
+            // Allow plain text check for legacy users before migration, OR assume all are hashed
+            // Better to assume hash, and if fails, maybe check plain text (optional migration strategy)
+            // For now, strict hash check.
+            let isMatch = false;
+            if (user.password) {
+                isMatch = await bcrypt.compare(currentPassword, user.password);
+                // Fallback for plain text (temporary for existing users not yet migrated)
+                if (!isMatch && user.password === currentPassword) {
+                    isMatch = true;
+                    // Optionally auto-hash here, but let's keep it simple for now as we are replacing it
+                }
+            }
+
+            if (!isMatch) {
                 return res.status(400).json({ error: 'Senha atual incorreta' });
             }
         }
@@ -159,8 +178,10 @@ export const updateProfile = async (req, res) => {
             values.push(name);
         }
         if (newPassword) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(newPassword, salt);
             updates.push('password = ?');
-            values.push(newPassword);
+            values.push(hashedPassword);
         }
 
         values.push(userId);

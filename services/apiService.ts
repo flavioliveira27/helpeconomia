@@ -1,11 +1,25 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
+export class ApiError extends Error {
+    code?: string;
+    user?: any;
+
+    constructor(message: string, code?: string, user?: any) {
+        super(message);
+        this.name = 'ApiError';
+        this.code = code;
+        this.user = user;
+    }
+}
+
 class ApiService {
+    private token: string | null;
+
     constructor() {
         this.token = localStorage.getItem('token') || null;
     }
 
-    setToken(token) {
+    setToken(token: string | null) {
         this.token = token;
         if (token) {
             localStorage.setItem('token', token);
@@ -15,7 +29,7 @@ class ApiService {
     }
 
     getHeaders() {
-        const headers = {
+        const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
         if (this.token) {
@@ -24,9 +38,9 @@ class ApiService {
         return headers;
     }
 
-    async request(endpoint, options = {}) {
+    async request(endpoint: string, options: RequestInit = {}) {
         const url = `${API_URL}${endpoint}`;
-        const config = {
+        const config: RequestInit = {
             ...options,
             headers: {
                 ...this.getHeaders(),
@@ -39,10 +53,7 @@ class ApiService {
             const data = await response.json();
 
             if (!response.ok) {
-                const errorObj: any = new Error(data.error || 'Erro na requisição');
-                errorObj.code = data.code;
-                errorObj.user = data.user; // To pass user info even on error (e.g. for subscription page)
-                throw errorObj;
+                throw new ApiError(data.error || 'Erro na requisição', data.code, data.user);
             }
 
             return data;

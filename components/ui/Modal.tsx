@@ -30,20 +30,20 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div
-                className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-700"
                 role="dialog"
                 aria-modal="true"
             >
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
+                <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{title}</h3>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 transition-colors rounded-full p-1 hover:bg-slate-100"
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-full p-1 hover:bg-slate-100 dark:hover:bg-slate-700"
                     >
                         <X size={20} />
                     </button>
                 </div>
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto">
                     {children}
                 </div>
             </div>

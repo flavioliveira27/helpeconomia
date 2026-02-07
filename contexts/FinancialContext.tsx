@@ -169,17 +169,13 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       setIsAuthenticated(true);
       await loadData(response.user);
       return { success: true };
-    } catch (error: any) { // Use any to access properties
+    } catch (error: any) {
       console.error('Login error:', error);
-      // Handle known API errors
-      if (error.message) {
-        // Check if the error object from apiService throw has code (it throws the data object if not ok? No, apiService throws Error(data.error))
-        // Wait, apiService throws `new Error(data.error || 'Erro')`. It loses access to `code`.
-        // I should fix apiService to throw the full object or handle it better.
-        // For now, assuming apiService might need a tweak OR I parse the error string?
-        // Actually, let's fix apiService to throw a custom error object containing code.
-      }
-      return { success: false, error: error.message, code: error.code };
+
+      const errorMessage = error.message || 'Erro desconhecido';
+      const errorCode = error.code || undefined;
+
+      return { success: false, error: errorMessage, code: errorCode };
     }
   };
 
@@ -331,7 +327,6 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       setSelectedMonth,
       setSelectedYear,
       user,
-      usersList,
       usersList,
       isAuthenticated,
       isLoading,
