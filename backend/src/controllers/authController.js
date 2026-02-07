@@ -261,8 +261,10 @@ export const resetPassword = async (req, res) => {
         }
         const user = users[0];
 
-        // Updating password (plain text as per current system, strictly should be hashed)
-        await db.query('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [newPassword, user.id]);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        await db.query('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [hashedPassword, user.id]);
 
         res.json({ message: 'Senha alterada com sucesso' });
     } catch (error) {
