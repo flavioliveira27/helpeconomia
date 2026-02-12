@@ -19,7 +19,12 @@ export const getTransactionsForMonth = (
 
             const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
 
-            if (diffMonths >= 0) {
+            // For Credit Card transactions, they appear in the NEXT month (bill)
+            // So recurrent credit transactions also start 1 month later
+            const isCredit = t.paymentMethod === TransactionPaymentMethod.CREDIT;
+            const minDiff = isCredit ? 1 : 0;
+
+            if (diffMonths >= minDiff) {
                 // Create a new date for this occurrence
                 // We use the original day, but the selected month and year
                 const originalDay = parseInt(t.date.split('-')[2]);
