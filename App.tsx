@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FinancialProvider, useFinancial } from './contexts/FinancialContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Transactions } from './pages/Transactions';
@@ -59,12 +60,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      <Route path="/admin/users" element={
-        <ProtectedRoute>
-          <AdminUsers />
-        </ProtectedRoute>
-      } />
-
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
@@ -75,10 +70,6 @@ const AppRoutes = () => {
     </Routes>
   );
 };
-
-import { ThemeProvider } from './contexts/ThemeContext';
-
-// ... (existing imports)
 
 const App: React.FC = () => {
   return (

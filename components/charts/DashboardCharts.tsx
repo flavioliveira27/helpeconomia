@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { useFinancial } from '../../contexts/FinancialContext';
 import { TransactionType, TransactionImportance } from '../../types';
+import { getTransactionsForMonth } from '../../utils/financialUtils';
 
 import { CATEGORY_COLORS } from '../../constants';
 
@@ -302,11 +303,7 @@ export const Trends: React.FC = () => {
       prevYear = selectedYear - 1;
     }
 
-    const prevTransactions = transactions.filter(t => {
-      const d = new Date(t.date);
-      const [y, m] = t.date.split('-').map(Number);
-      return (m - 1) === prevMonth && y === prevYear;
-    });
+    const prevTransactions = getTransactionsForMonth(transactions, prevYear, prevMonth);
 
     let prevIncome = 0;
     let prevExpense = 0;
@@ -401,11 +398,8 @@ export const SixMonthEvolutionChart: React.FC = () => {
       const m = currentDate.getMonth();
       const y = currentDate.getFullYear();
 
-      // Filter transactions for this month/year
-      const monthTrans = transactions.filter(t => {
-        const [tY, tM] = t.date.split('-').map(Number);
-        return tY === y && (tM - 1) === m;
-      });
+      // Filter transactions for this month/year using the shared utility
+      const monthTrans = getTransactionsForMonth(transactions, y, m);
 
       // Sum Income and Expenses
       let income = 0;

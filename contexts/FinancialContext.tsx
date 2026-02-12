@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { Transaction, TransactionType, FinancialSummary, User } from '../types';
 import { apiService } from '../services/apiService';
+import { getTransactionsForMonth } from '../utils/financialUtils';
 
 interface FinancialContextType {
   transactions: Transaction[];
@@ -106,61 +107,9 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const filteredTransactions = useMemo(() => {
-    return transactions.flatMap(t => {
-      const [tYear, tMonth] = t.date.split('-').map(Number);
-      const tDate = new Date(tYear, tMonth - 1);
-      const selectedDate = new Date(selectedYear, selectedMonth);
-
-      // 1. Recurring transaction logic (Fixed Expenses AND Investments) - PRIORITIZED
-      // Ensure t.recurring is treated as boolean (DB might return 1/0)
-      if ((t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.INVESTMENT) && (t.recurring === true || t.recurring === 1 || Boolean(t.recurring) === true)) {
-        // Compare Year/Month
-        const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
-
-        if (diffMonths >= 0) {
-          const originalDay = parseInt(t.date.split('-')[2]);
-          const newDate = new Date(selectedYear, selectedMonth, originalDay);
-
-          return [{
-            ...t,
-            date: newDate.toISOString().split('T')[0]
-          }];
-        }
-        return [];
-      }
-
-      // 2. Installment transaction logic
-      if (t.installments && t.installments > 1) {
-        const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
-
-        if (diffMonths >= 1 && diffMonths <= t.installments) {
-          const installmentValue = t.amount / t.installments;
-          const currentInstallment = diffMonths;
-
-          return [{
-            ...t,
-            amount: installmentValue,
-            originalAmount: t.amount,
-            description: `${t.description} (${currentInstallment}/${t.installments})`
-            // Date is NOT modified
-          }];
-        }
-        return [];
-      }
-
-      // 3. Simple transaction (Standard)
-      if (tDate.getTime() === selectedDate.getTime()) {
-        return [t];
-      }
-
-
-
-
-
-
-      return [];
-    });
+    return getTransactionsForMonth(transactions, selectedYear, selectedMonth);
   }, [transactions, selectedMonth, selectedYear]);
+
 
   const login = async (email: string, password: string) => {
     try {
