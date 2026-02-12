@@ -14,7 +14,7 @@ export const getTransactionsForMonth = (
         // 1. Recurring transaction logic
         // Checks if the transaction is recurring and handles projection
         // We use Boolean(t.recurring) to handle both boolean true and number 1 from DB
-        if ((t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.INVESTMENT) &&
+        if ((t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.INVESTMENT || t.type === TransactionType.VARIABLE_EXPENSE || t.type === TransactionType.INCOME) &&
             Boolean(t.recurring)) {
 
             const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
@@ -37,9 +37,7 @@ export const getTransactionsForMonth = (
         if (t.installments && t.installments > 1) {
             const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
 
-            // Logic copied from FinancialContext:
-            // Installments start the NEXT month after the transaction date.
-            // diffMonths = 1 means 1 month after.
+            // Installments start the NEXT month after the transaction date (Credit Card logic)
             if (diffMonths >= 1 && diffMonths <= t.installments) {
                 const installmentValue = t.amount / t.installments;
                 const currentInstallment = diffMonths;
