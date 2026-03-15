@@ -20,8 +20,8 @@ docker-compose up --build
 ```
 
 ### Acessar a Aplicação
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+- **Frontend**: http://localhost:8001
+- **Backend API**: http://localhost:5001
 - **MySQL**: localhost:3306
 
 ### Login
@@ -116,8 +116,8 @@ docker-compose up --build
 
 ## 📝 Notas de Desenvolvimento
 
-- O backend roda na porta 5000
-- O frontend roda na porta 3000
+- O backend roda na porta 5001
+- O frontend roda na porta 8001
 - Os dados são persistidos no volume Docker `mysql_data`
 - Hot reload está habilitado no frontend
 
