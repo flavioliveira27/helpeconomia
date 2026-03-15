@@ -1,75 +1,95 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: helpeconomia_mysql
     environment:
-      MYSQL_ROOT_PASSWORD: Castr0@2715
-      MYSQL_DATABASE: helpeconomia
-      MYSQL_USER: finansmart_user
-      MYSQL_PASSWORD: finansmart_pass_2024
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
     volumes:
-      - mysql_data_prod:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./backend/my.cnf:/etc/mysql/conf.d/my.cnf
     networks:
-      - helpeconomia_internal
+      - helpeconomia_network
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
-    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build: ./backend
     container_name: helpeconomia_backend
     ports:
-      - "5001:5000"
+      - "${PORT}:${PORT}"
     environment:
-      DB_HOST: mysql
-      DB_USER: finansmart_user
-      DB_PASSWORD: finansmart_pass_2024
-      DB_NAME: helpeconomia
-      DB_PORT: 3306
-      JWT_SECRET: finansmart_secret_key_2024_super_secure
-      GEMINI_API_KEY: AIzaSyAf26DSPV2qwDwAL-9N2b6j1aMenqIK-N0
-      PORT: 5000
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PORT: ${PORT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_SECURE: ${EMAIL_SECURE}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - helpeconomia_internal
-      - nginx-proxy-network
+      - helpeconomia_network
     volumes:
       - ./backend:/app
-      - /app/node_modules
-    restart: always
+      - backend_node_modules:/app/node_modules
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
       context: .
-      args:
-        - VITE_API_URL=https://api.helpeconomia.com.br
+      target: development
     container_name: helpeconomia_frontend
     ports:
-      - "8001:80"
+      - "8001:8001"
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
-      - VITE_API_URL=https://api.helpeconomia.com.br
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=${VITE_API_URL}
     depends_on:
       - backend
     networks:
-      - nginx-proxy-network
-    restart: always
-
-networks:
-  helpeconomia_internal:
-    driver: bridge
-
-  nginx-proxy-network:
-    external: true
+      - helpeconomia_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
-  mysql_data_prod:
+  backend_node_modules:
+
+
+networks:
+  helpeconomia_network:
+    driver: bridge
