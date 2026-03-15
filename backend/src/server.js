@@ -9,6 +9,7 @@ import webhookRoutes from './routes/webhooks.js';
 import profileRoutes from './routes/profile.js';
 import creditCardRoutes from './routes/credit_cards.js';
 import cardInvoiceRoutes from './routes/card_invoices.js';
+import goalRoutes from './routes/goals.js';
 import { syncDatabase } from './config/initDb.js';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/credit-cards', creditCardRoutes);
 app.use('/api/credit-cards/:cardId/invoices', cardInvoiceRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

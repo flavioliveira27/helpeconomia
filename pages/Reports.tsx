@@ -160,11 +160,11 @@ export const Reports: React.FC = () => {
     // Usamos rawTransactions para Crédito para pegar o valor exato no mês exato da fatura
     const creditRawExpenses = rawTransactions.filter(t => {
       if (!(t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE)) return false;
-      
+
       // Se for do módulo de Cartões de Crédito (novo), filtramos pela data real da fatura no banco
       if (t.credit_card_id && t.invoice_date) {
-         const [iYear, iMonth] = t.invoice_date.split('-').map(Number);
-         return iYear === selectedYear && (iMonth - 1) === selectedMonth;
+        const [iYear, iMonth] = t.invoice_date.split('-').map(Number);
+        return iYear === selectedYear && (iMonth - 1) === selectedMonth;
       }
       return false; // Ignorar transações de crédito antigas para não duplicar, ou mantê-las se precisar. Vamos focar apenas no módulo novo.
     });
@@ -177,20 +177,20 @@ export const Reports: React.FC = () => {
       .filter(t => t.installments && t.installments > 1)
       .reduce((sum, t) => sum + Number(t.amount), 0); // O BD já salva o valor da parcela fracionado no 'amount'
 
-    const othersList = expenses.filter(t => 
-        ![TransactionPaymentMethod.CREDIT, TransactionPaymentMethod.CREDIT_INSTALLMENTS].includes(t.paymentMethod as TransactionPaymentMethod) 
-        && t.id > 0 // Exclui faturas geradas automaticamente pelo contexto 
+    const othersList = expenses.filter(t =>
+      ![TransactionPaymentMethod.CREDIT, TransactionPaymentMethod.CREDIT_INSTALLMENTS].includes(t.paymentMethod as TransactionPaymentMethod)
+      && t.id > 0 // Exclui faturas geradas automaticamente pelo contexto 
     );
     const others = othersList.reduce((sum, t) => sum + Number(t.amount), 0);
 
     // By Importance
-    const essentials = 
-        othersList.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0) +
-        creditRawExpenses.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0);
+    const essentials =
+      othersList.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0) +
+      creditRawExpenses.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0);
 
-    const superfluous = 
-        othersList.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0) +
-        creditRawExpenses.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0);
+    const superfluous =
+      othersList.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0) +
+      creditRawExpenses.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0);
 
     return { creditCard, creditInstallments, others, essentials, superfluous };
   }, [filteredTransactions, rawTransactions, selectedMonth, selectedYear]);
@@ -198,7 +198,8 @@ export const Reports: React.FC = () => {
   const investmentBreakdown = useMemo(() => {
     const investments = filteredTransactions.filter(t => t.type === TransactionType.INVESTMENT);
     const byCategory = investments.reduce((acc, t) => {
-      const category = t.category || 'Outros';
+      // Map 'Investimentos' (old category) to 'Metas' for display
+      const category = (t.category === 'Investimentos' ? 'Metas' : t.category) || 'Outros';
       acc[category] = (acc[category] || 0) + Number(t.amount);
       return acc;
     }, {} as Record<string, number>);
@@ -307,7 +308,7 @@ export const Reports: React.FC = () => {
             <span className="text-xl font-bold text-rose-700">{formatMoney(summary.totalFixedExpenses + summary.totalVariableExpenses)}</span>
           </div>
           <div className="p-4 border border-slate-200 rounded-lg bg-blue-50 text-center">
-            <span className="block text-xs uppercase font-bold text-slate-500 mb-1">Investimentos</span>
+            <span className="block text-xs uppercase font-bold text-slate-500 mb-1">Metas</span>
             <span className="text-xl font-bold text-blue-700">{formatMoney(summary.totalInvestments)}</span>
           </div>
           <div className={`p-4 border border-slate-200 rounded-lg text-center ${summary.balance >= 0 ? 'bg-emerald-100' : 'bg-rose-100'}`}>
@@ -415,7 +416,7 @@ export const Reports: React.FC = () => {
           <div className="mt-2 break-inside-avoid p-6 border border-slate-200 rounded-xl">
             <h3 className="text-sm font-bold uppercase text-slate-800 border-b border-blue-500 pb-2 mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              Investimentos
+              Metas
             </h3>
             {/* Visual Distribution Bar */}
             <div className="flex h-4 w-full rounded-md overflow-hidden bg-slate-100 mb-6">
@@ -565,7 +566,7 @@ export const Reports: React.FC = () => {
                       <span className="material-icons-round">savings</span>
                     </div>
                     <div className="text-left">
-                      <div className="font-bold text-slate-700 dark:text-slate-200">Total Investido</div>
+                      <div className="font-bold text-slate-700 dark:text-slate-200">Total em Investimentos</div>
                       <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Aportes do Mês</div>
                     </div>
                   </div>
@@ -648,7 +649,7 @@ export const Reports: React.FC = () => {
                 </div>
 
                 <div className="flex justify-between items-end mt-2">
-                  <span className="text-sm text-slate-500">Investimentos</span>
+                  <span className="text-sm text-slate-500">Metas</span>
                   <span className="font-bold text-slate-700 dark:text-slate-300">{formatMoney(summary.totalInvestments)}</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">

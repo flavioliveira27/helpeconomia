@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   category VARCHAR(100) NOT NULL,
   date DATE NOT NULL,
   observation TEXT,
-  payment_method ENUM('CREDITO', 'DEBITO', 'PIX', 'CREDITO PARCELADO'),
+  payment_method ENUM('CREDITO', 'DÉBITO', 'PIX', 'CREDITO PARCELADO'),
   importance ENUM('ESSENCIAL', 'SUPERFLUO'),
   credit_card_id INT DEFAULT NULL,
   installments INT DEFAULT NULL,
@@ -90,5 +90,5 @@ INSERT INTO transactions (user_id, description, amount, type, category, date, pa
 (1, 'Supermercado Pão de Açúcar', 450.20, 'VARIABLE_EXPENSE', 'Alimentação', '2024-05-14', 'CREDITO', 'ESSENCIAL'),
 (1, 'Aluguel Apartamento', 2595.50, 'FIXED_EXPENSE', 'Moradia', '2024-05-05', 'PIX', 'ESSENCIAL'),
 (1, 'Investimento Tesouro Direto', 800.00, 'INVESTMENT', 'Renda Fixa', '2024-05-10', 'PIX', NULL),
-(1, 'Posto Ipiranga', 220.00, 'VARIABLE_EXPENSE', 'Transporte', '2024-05-22', 'DEBITO', 'ESSENCIAL'),
+(1, 'Posto Ipiranga', 220.00, 'VARIABLE_EXPENSE', 'Transporte', '2024-05-22', 'DÉBITO', 'ESSENCIAL'),
 (1, 'Aluguel Apartamento', 1800.00, 'FIXED_EXPENSE', 'Moradia', '2024-03-20', 'PIX', 'ESSENCIAL');

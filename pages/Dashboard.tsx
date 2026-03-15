@@ -225,7 +225,7 @@ export const Dashboard: React.FC = () => {
                 data={[
                   { name: 'Despesas Fixas', value: totalFixed, color: '#c084fc' },
                   { name: 'Gastos', value: totalVariable, color: '#f87171' },
-                  { name: 'Investimentos', value: totalInvestments, color: '#38bdf8' },
+                  { name: 'Metas', value: totalInvestments, color: '#38bdf8' },
                   { name: 'Saldo Restante', value: balanceVal, color: '#34d399' }
                 ].filter(item => item.value > 0)}
                 cx="50%"
@@ -239,7 +239,7 @@ export const Dashboard: React.FC = () => {
                 {[
                   { name: 'Despesas Fixas', value: totalFixed, color: '#c084fc' },
                   { name: 'Gastos', value: totalVariable, color: '#f87171' },
-                  { name: 'Investimentos', value: totalInvestments, color: '#38bdf8' },
+                  { name: 'Metas', value: totalInvestments, color: '#38bdf8' },
                   { name: 'Saldo Restante', value: balanceVal, color: '#34d399' }
                 ].filter(item => item.value > 0).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -281,7 +281,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-sky-400"></div>
-                <span className="text-sm font-medium">Investimentos</span>
+                <span className="text-sm font-medium">Metas</span>
               </div>
               <span className="text-sm font-bold">{Math.round(percentInvestments)}%</span>
             </div>
