@@ -7,7 +7,7 @@ export enum TransactionType {
 
 export enum TransactionPaymentMethod {
   CREDIT = 'CREDITO',
-  DEBIT = 'DEBITO',
+  DEBIT = 'DÉBITO',
   PIX = 'PIX',
   CREDIT_INSTALLMENTS = 'CREDITO PARCELADO'
 }

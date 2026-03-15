@@ -142,11 +142,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                                     onChange={e => setFormData({ ...formData, paymentMethod: e.target.value as TransactionPaymentMethod })}
                                 >
                                     <option value="" disabled>Selecione</option>
-                                    {Object.values(TransactionPaymentMethod)
-                                        .filter(m => m !== TransactionPaymentMethod.CREDIT_INSTALLMENTS || (initialData?.paymentMethod === TransactionPaymentMethod.CREDIT_INSTALLMENTS))
-                                        .map(m => (
-                                            <option key={m} value={m}>{m}</option>
-                                        ))}
+                                    {/* Variable expenses: only Débito and PIX */}
+                                    <option value={TransactionPaymentMethod.DEBIT}>{TransactionPaymentMethod.DEBIT}</option>
+                                    <option value={TransactionPaymentMethod.PIX}>{TransactionPaymentMethod.PIX}</option>
                                 </select>
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span className="material-icons-round text-slate-400">expand_more</span>
@@ -255,21 +253,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                                 <span className="material-icons-round text-slate-400">expand_more</span>
                             </div>
                         </div>
-                        {isCreditInstallments && (
-                            <p className="text-xs text-amber-600 mt-1 font-medium">
-                                * A primeira parcela será cobrada e somada apenas no próximo mês.
-                            </p>
-                        )}
-                        {formData.paymentMethod === TransactionPaymentMethod.CREDIT && (
-                            <p className="text-xs text-amber-600 mt-1 font-medium">
-                                * O valor será cobrado apenas no próximo mês.
-                            </p>
-                        )}
                     </div>
                 )}
 
-                {/* Recurring Checkbox - For Fixed Expenses, Investments, and now Credit Variable Expenses */}
-                {(type === TransactionType.FIXED_EXPENSE || type === TransactionType.INVESTMENT || (type === TransactionType.VARIABLE_EXPENSE && formData.paymentMethod === TransactionPaymentMethod.CREDIT)) && (
+                {/* Recurring Checkbox - For Fixed Expenses and Investments only */}
+                {(type === TransactionType.FIXED_EXPENSE || type === TransactionType.INVESTMENT) && (
                     <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer" onClick={() => setFormData({ ...formData, recurring: !formData.recurring })}>
                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.recurring ? 'bg-primary border-primary' : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-500'}`}>
                             {formData.recurring && <span className="material-icons-round text-white text-sm">check</span>}

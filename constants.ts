@@ -83,7 +83,7 @@ export const GENERAL_CATEGORIES = [
 
 // Categorias de Investimento
 export const INVESTMENT_CATEGORIES = [
-  'Renda Fixa', 'Renda Variável', 'Reserva de Emergência', 'Meta',
+  'Renda Fixa', 'Renda Variável', 'Reserva de Emergência',
   'Investimento Fixo', 'Criptomoeda', 'Fundo Cambial', 'Poupança',
   'Reserva Geral', 'Doação', 'Outros'
 ];
@@ -147,6 +147,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Renda Fixa': '#3b82f6', // blue-500
   'Renda Variável': '#6366f1', // indigo-500
   'Reserva de Emergência': '#0ea5e9', // sky-500
+  'Metas': '#d946ef', // fuchsia-500
   'Meta': '#d946ef', // fuchsia-500
   'Investimento Fixo': '#2563eb', // blue-600
   'Criptomoeda': '#eab308', // yellow-500
@@ -208,6 +209,7 @@ export const CATEGORY_THEMES: Record<string, string> = {
 
   // Investimentos
   'Reserva de Emergência': 'bg-sky-100 text-sky-800 border-sky-200',
+  'Metas': 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
   'Meta': 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
   'Investimento Fixo': 'bg-blue-50 text-blue-900 border-blue-200',
   'Criptomoeda': 'bg-yellow-100 text-yellow-800 border-yellow-200',

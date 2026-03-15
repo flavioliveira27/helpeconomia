@@ -17,6 +17,7 @@ import { ResetPassword } from './pages/ResetPassword';
 import { TrialSuccess } from './pages/TrialSuccess';
 import { CreditCards } from './pages/CreditCards';
 import { CardDetails } from './pages/CreditCards/CardDetails';
+import { Goals } from './pages/Goals';
 
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -69,6 +70,12 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
+      <Route path="/metas" element={
+        <ProtectedRoute>
+          <Goals />
+        </ProtectedRoute>
+      } />
+
       <Route path="/admin/users" element={
         <ProtectedRoute>
           <AdminUsers />
@@ -86,14 +93,18 @@ const AppRoutes = () => {
   );
 };
 
+import { GoalProvider } from './contexts/GoalContext';
+
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <FinancialProvider>
         <CreditCardProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
+          <GoalProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+          </GoalProvider>
         </CreditCardProvider>
       </FinancialProvider>
     </ThemeProvider>

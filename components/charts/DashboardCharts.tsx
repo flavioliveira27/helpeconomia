@@ -466,9 +466,11 @@ export const InvestmentDistributionChart: React.FC = () => {
   const { data: investmentData, totalInvested } = useMemo(() => {
     const investments = filteredTransactions.filter(t => t.type === TransactionType.INVESTMENT);
 
+    // Merge 'Investimentos' (old category) with 'Metas' (new category) for display
     const categoryTotals: Record<string, number> = {};
     investments.forEach(t => {
-      categoryTotals[t.category] = (categoryTotals[t.category] || 0) + Number(t.amount);
+      const displayCat = t.category === 'Investimentos' ? 'Metas' : t.category;
+      categoryTotals[displayCat] = (categoryTotals[displayCat] || 0) + Number(t.amount);
     });
 
     const total = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
