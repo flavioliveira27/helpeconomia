@@ -9,8 +9,12 @@ import webhookRoutes from './routes/webhooks.js';
 import profileRoutes from './routes/profile.js';
 import creditCardRoutes from './routes/credit_cards.js';
 import cardInvoiceRoutes from './routes/card_invoices.js';
+import { syncDatabase } from './config/initDb.js';
 
 dotenv.config();
+
+// Sync Database Schema
+syncDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
