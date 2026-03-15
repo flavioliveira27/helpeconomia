@@ -93,6 +93,31 @@ export const updateTransaction = async (req, res) => {
 
         values.push(id);
 
+        // Recalculate invoice_date if this is a credit card transaction and date is being updated
+        if (existing[0].credit_card_id && req.body.date) {
+            const [cardRows] = await db.query('SELECT closing_day, due_day FROM credit_cards WHERE id = ?', [existing[0].credit_card_id]);
+            if (cardRows.length > 0) {
+                const card = cardRows[0];
+                const parts = req.body.date.split('-');
+                const txYear = parseInt(parts[0], 10);
+                const txMonth = parseInt(parts[1], 10) - 1; // 0-indexed month
+                const txDay = parseInt(parts[2], 10);
+
+                let invoiceMonth = txMonth + 1;
+                let invoiceYear = txYear;
+                if (txDay >= card.closing_day) {
+                    invoiceMonth += 1;
+                    if (invoiceMonth > 12) {
+                        invoiceMonth = 1;
+                        invoiceYear += 1;
+                    }
+                }
+                const invoiceDateStr = `${invoiceYear}-${String(invoiceMonth).padStart(2, '0')}-${String(card.due_day).padStart(2, '0')}`;
+                updates.push('invoice_date = ?');
+                values.push(invoiceDateStr);
+            }
+        }
+
         await db.query(
             `UPDATE transactions SET ${updates.join(', ')} WHERE id = ?`,
             values
@@ -116,16 +141,50 @@ export const deleteTransaction = async (req, res) => {
         const { id } = req.params;
         const userId = req.user.id;
 
-        const [result] = await db.query(
-            'DELETE FROM transactions WHERE id = ? AND user_id = ?',
+        // Fetch the transaction to check if it's a credit card installment
+        const [targetTxRows] = await db.query(
+            "SELECT *, DATE_FORMAT(date, '%Y-%m-%d') as orig_date FROM transactions WHERE id = ? AND user_id = ?",
             [id, userId]
         );
 
-        if (result.affectedRows === 0) {
+        if (targetTxRows.length === 0) {
             return res.status(404).json({ error: 'Transação não encontrada' });
         }
 
-        res.json({ message: 'Transação excluída com sucesso' });
+        const targetTx = targetTxRows[0];
+
+        // If it's a credit card transaction with multiple installments, delete all of them
+        if (targetTx.credit_card_id && targetTx.installments && targetTx.installments > 1) {
+            // Reconstruct the base description without the " (X/Y)" suffix
+            // Using a more relaxed regex to catch variations
+            const baseDescription = targetTx.description.replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+            
+            // Delete all transactions that match the heuristic criteria for this installment group
+            // Removed 'amount' to avoid floating point division mismatch.
+            const [result] = await db.query(
+                `DELETE FROM transactions 
+                 WHERE user_id = ? 
+                 AND credit_card_id = ? 
+                 AND date = ? 
+                 AND installments = ? 
+                 AND description LIKE ?`,
+                [userId, targetTx.credit_card_id, targetTx.orig_date, targetTx.installments, `${baseDescription}%`]
+            );
+
+            return res.json({ message: 'Todas as parcelas da transação foram excluídas com sucesso', deletedCount: result.affectedRows });
+        } else {
+            // Standard single-transaction deletion
+            const [result] = await db.query(
+                'DELETE FROM transactions WHERE id = ? AND user_id = ?',
+                [id, userId]
+            );
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Transação não encontrada' });
+            }
+
+            return res.json({ message: 'Transação excluída com sucesso' });
+        }
     } catch (error) {
         console.error('Delete transaction error:', error);
         res.status(500).json({ error: 'Erro ao excluir transação' });

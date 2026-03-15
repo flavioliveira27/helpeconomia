@@ -3,6 +3,7 @@ import { Modal } from '../ui/Modal';
 import { Transaction, TransactionType, TransactionPaymentMethod, TransactionImportance } from '../../types';
 import { CATEGORIES, GENERAL_CATEGORIES, INVESTMENT_CATEGORIES, INCOME_CATEGORIES, FIXED_EXPENSE_CATEGORIES, VARIABLE_EXPENSE_CATEGORIES } from '../../constants';
 import { Button } from '../ui/Button';
+import { formatCurrencyInput, parseCurrencyInput } from '../../utils/formatters';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -95,19 +96,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     // Helper to safely parse
     const parsedVal = (v: any) => parseFloat(v) || 0;
 
-    // Helper to format currency input (BRL)
-    const formatCurrencyInput = (value: number | undefined): string => {
-        // Always return a formatted string, default to 0,00
-        const val = value || 0;
-        return val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    // Helper to parse currency string input
-    const parseCurrencyInput = (value: string): number => {
-        const numbers = value.replace(/\D/g, '');
-        return Number(numbers) / 100;
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
@@ -154,9 +142,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                                     onChange={e => setFormData({ ...formData, paymentMethod: e.target.value as TransactionPaymentMethod })}
                                 >
                                     <option value="" disabled>Selecione</option>
-                                    {Object.values(TransactionPaymentMethod).map(m => (
-                                        <option key={m} value={m}>{m}</option>
-                                    ))}
+                                    {Object.values(TransactionPaymentMethod)
+                                        .filter(m => m !== TransactionPaymentMethod.CREDIT_INSTALLMENTS || (initialData?.paymentMethod === TransactionPaymentMethod.CREDIT_INSTALLMENTS))
+                                        .map(m => (
+                                            <option key={m} value={m}>{m}</option>
+                                        ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span className="material-icons-round text-slate-400">expand_more</span>

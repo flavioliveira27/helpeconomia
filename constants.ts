@@ -1,5 +1,6 @@
 import { Transaction, TransactionType } from './types';
 
+export const APP_VERSION = '1.0.0';
 export const INITIAL_TRANSACTIONS: Transaction[] = [
   {
     id: 1,

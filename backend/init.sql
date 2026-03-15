@@ -32,7 +32,22 @@ CREATE TABLE IF NOT EXISTS users (
   INDEX idx_subscription (subscription_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabela de Transações
+-- Tabela de Cartões de Crédito
+CREATE TABLE IF NOT EXISTS credit_cards (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  brand VARCHAR(50) NOT NULL, -- Visa, Mastercard, Elo, etc
+  limit_amount DECIMAL(10,2) NOT NULL,
+  closing_day INT NOT NULL,
+  due_day INT NOT NULL,
+  color_theme VARCHAR(50) DEFAULT 'purple', -- Para a UI bonitona
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Tabela de Transações
 CREATE TABLE IF NOT EXISTS transactions (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,14 +60,19 @@ CREATE TABLE IF NOT EXISTS transactions (
   observation TEXT,
   payment_method ENUM('CREDITO', 'DEBITO', 'PIX', 'CREDITO PARCELADO'),
   importance ENUM('ESSENCIAL', 'SUPERFLUO'),
+  credit_card_id INT DEFAULT NULL,
   installments INT DEFAULT NULL,
+  installment_number INT DEFAULT NULL,
+  invoice_date DATE DEFAULT NULL, -- Data base da fatura que esta transação pertence
   recurring BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (credit_card_id) REFERENCES credit_cards(id) ON DELETE SET NULL,
   INDEX idx_user_date (user_id, date),
   INDEX idx_type (type),
-  INDEX idx_category (category)
+  INDEX idx_category (category),
+  INDEX idx_card_invoice (credit_card_id, invoice_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dados Iniciais (Seed)

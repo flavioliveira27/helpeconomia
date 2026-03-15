@@ -681,6 +681,4 @@ export const DashboardCharts: React.FC = () => {
       <InvestmentDistributionChart />
     </div>
   );
-}
-
-export default DashboardCharts;
+};

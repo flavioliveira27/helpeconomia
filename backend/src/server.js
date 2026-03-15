@@ -7,11 +7,13 @@ import transactionRoutes from './routes/transactions.js';
 import aiRoutes from './routes/ai.js';
 import webhookRoutes from './routes/webhooks.js';
 import profileRoutes from './routes/profile.js';
+import creditCardRoutes from './routes/credit_cards.js';
+import cardInvoiceRoutes from './routes/card_invoices.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -29,6 +31,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/credit-cards', creditCardRoutes);
+app.use('/api/credit-cards/:cardId/invoices', cardInvoiceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
