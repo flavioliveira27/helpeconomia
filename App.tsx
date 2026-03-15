@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FinancialProvider, useFinancial } from './contexts/FinancialContext';
+import { CreditCardProvider } from './contexts/CreditCardContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -14,6 +15,8 @@ import { Subscription } from './pages/Subscription';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { TrialSuccess } from './pages/TrialSuccess';
+import { CreditCards } from './pages/CreditCards';
+import { CardDetails } from './pages/CreditCards/CardDetails';
 
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -54,6 +57,18 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
+      <Route path="/cartoes" element={
+        <ProtectedRoute>
+          <CreditCards />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/cartoes/:id" element={
+        <ProtectedRoute>
+          <CardDetails />
+        </ProtectedRoute>
+      } />
+
       <Route path="/admin/users" element={
         <ProtectedRoute>
           <AdminUsers />
@@ -75,9 +90,11 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <FinancialProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <CreditCardProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </CreditCardProvider>
       </FinancialProvider>
     </ThemeProvider>
   );

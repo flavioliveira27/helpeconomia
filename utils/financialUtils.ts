@@ -39,10 +39,11 @@ export const getTransactionsForMonth = (
         }
 
         // 2. Installment transaction logic
-        if (t.installments && t.installments > 1) {
+        if (t.installments && t.installments > 1 && t.paymentMethod === TransactionPaymentMethod.CREDIT) {
             const diffMonths = (selectedYear - tYear) * 12 + (selectedMonth - (tMonth - 1));
 
             // Installments start the NEXT month after the transaction date (Credit Card logic)
+            // Se a diferença de meses for maior ou igual a 1 (próximo mês) e menor ou igual as parcelas
             if (diffMonths >= 1 && diffMonths <= t.installments) {
                 const installmentValue = t.amount / t.installments;
                 const currentInstallment = diffMonths;
@@ -52,14 +53,18 @@ export const getTransactionsForMonth = (
                     amount: installmentValue,
                     originalAmount: t.amount,
                     description: `${t.description} (${currentInstallment}/${t.installments})`
-                    // Date is usually the original date, but for display in a monthly report, 
-                    // the consumer uses 'selectedYear/Month'. 
-                    // However, we might want to update the date to match the view month?
-                    // FinancialContext didn't update the date for installments, 
-                    // relying on the fact that this list is already filtered FOR this month.
                 }];
             }
+            // Se não estiver dentro do range de meses, não exibe
             return [];
+        } else if (t.installments && t.installments > 1 && t.paymentMethod !== TransactionPaymentMethod.CREDIT) {
+           // Se for parcelado mas não for crédito (ex: algum outro tipo futuro), fraciona na hora
+            const installmentValue = t.amount / t.installments;
+            return [{
+                 ...t,
+                 amount: installmentValue,
+                 originalAmount: t.amount
+            }];
         }
 
         // 3. Credit Card (Next Month) logic

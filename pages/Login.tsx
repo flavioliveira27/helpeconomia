@@ -49,7 +49,7 @@ const LoginForm = () => {
       setLoading(false);
 
       if (result.success) {
-        if (result.isNewUser) {
+        if ((result as any).isNewUser) {
           navigate('/trial-started');
         } else {
           navigate('/');

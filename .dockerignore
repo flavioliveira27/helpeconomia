@@ -3,3 +3,11 @@ dist
 .git
 .env.local
 .env
+
+# Dados do banco de dados (previne erro de socket)
+mysql_data
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -15,7 +15,7 @@ import { Printer, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { TransactionType, TransactionPaymentMethod, TransactionImportance } from '../types';
 
 export const Reports: React.FC = () => {
-  const { getSummary, user, filteredTransactions, selectedMonth, selectedYear, setSelectedMonth } = useFinancial();
+  const { getSummary, user, filteredTransactions, filteredRawTransactions, rawTransactions, selectedMonth, selectedYear, setSelectedMonth } = useFinancial();
   const summary = getSummary(); // Now returns summaries based on filteredTransactions
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
@@ -44,13 +44,13 @@ export const Reports: React.FC = () => {
       let bgStyle = '';
       let textStyle = 'color: #334155;'; // Slate 700
 
-      if (t.type === 'receita') {
+      if (t.type === TransactionType.INCOME) {
         bgStyle = 'background-color: #d1fae5;'; // Emerald 100
         textStyle = 'color: #065f46;'; // Emerald 800
-      } else if (t.type === 'despesa_fixa' || t.type === 'despesa_variavel') {
+      } else if (t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE) {
         bgStyle = 'background-color: #ffe4e6;'; // Rose 100
         textStyle = 'color: #9f1239;'; // Rose 800
-      } else if (t.type === 'investimento') {
+      } else if (t.type === TransactionType.INVESTMENT) {
         bgStyle = 'background-color: #dbeafe;'; // Blue 100
         textStyle = 'color: #1e40af;'; // Blue 800
       }
@@ -157,27 +157,43 @@ export const Reports: React.FC = () => {
     const expenses = filteredTransactions.filter(t => t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE);
 
     // By Method
-    const creditCard = expenses
-      .filter(t => t.paymentMethod === TransactionPaymentMethod.CREDIT)
+    // Usamos rawTransactions para Crédito para pegar o valor exato no mês exato da fatura
+    const creditRawExpenses = rawTransactions.filter(t => {
+      if (!(t.type === TransactionType.FIXED_EXPENSE || t.type === TransactionType.VARIABLE_EXPENSE)) return false;
+      
+      // Se for do módulo de Cartões de Crédito (novo), filtramos pela data real da fatura no banco
+      if (t.credit_card_id && t.invoice_date) {
+         const [iYear, iMonth] = t.invoice_date.split('-').map(Number);
+         return iYear === selectedYear && (iMonth - 1) === selectedMonth;
+      }
+      return false; // Ignorar transações de crédito antigas para não duplicar, ou mantê-las se precisar. Vamos focar apenas no módulo novo.
+    });
+
+    const creditCard = creditRawExpenses
+      .filter(t => (!t.installments || t.installments <= 1))
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    const creditInstallments = expenses
-      .filter(t => t.paymentMethod === TransactionPaymentMethod.CREDIT_INSTALLMENTS)
-      .reduce((sum, t) => {
-        // In filteredTransactions, installments are already divided, so we just sum the amount
-        return sum + Number(t.amount);
-      }, 0);
+    const creditInstallments = creditRawExpenses
+      .filter(t => t.installments && t.installments > 1)
+      .reduce((sum, t) => sum + Number(t.amount), 0); // O BD já salva o valor da parcela fracionado no 'amount'
 
-    const others = expenses
-      .filter(t => ![TransactionPaymentMethod.CREDIT, TransactionPaymentMethod.CREDIT_INSTALLMENTS].includes(t.paymentMethod as TransactionPaymentMethod))
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const othersList = expenses.filter(t => 
+        ![TransactionPaymentMethod.CREDIT, TransactionPaymentMethod.CREDIT_INSTALLMENTS].includes(t.paymentMethod as TransactionPaymentMethod) 
+        && t.id > 0 // Exclui faturas geradas automaticamente pelo contexto 
+    );
+    const others = othersList.reduce((sum, t) => sum + Number(t.amount), 0);
 
     // By Importance
-    const essentials = expenses.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0);
-    const superfluous = expenses.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0);
+    const essentials = 
+        othersList.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0) +
+        creditRawExpenses.filter(t => t.importance === TransactionImportance.ESSENTIAL).reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const superfluous = 
+        othersList.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0) +
+        creditRawExpenses.filter(t => t.importance === TransactionImportance.SUPERFLUOUS).reduce((sum, t) => sum + Number(t.amount), 0);
 
     return { creditCard, creditInstallments, others, essentials, superfluous };
-  }, [filteredTransactions]);
+  }, [filteredTransactions, rawTransactions, selectedMonth, selectedYear]);
 
   const investmentBreakdown = useMemo(() => {
     const investments = filteredTransactions.filter(t => t.type === TransactionType.INVESTMENT);

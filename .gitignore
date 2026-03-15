@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Build outputs
+/dist
+/build
+/.output
+/.nuxt
+mysql_data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -24,6 +31,8 @@ dist-ssr
 *.sw?
 .env
 .env.*
+!.env.example
 
 # Database Data
 mysql_data/
+node_modules

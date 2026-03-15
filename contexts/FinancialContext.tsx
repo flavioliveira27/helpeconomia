@@ -6,6 +6,8 @@ import { getTransactionsForMonth } from '../utils/financialUtils';
 interface FinancialContextType {
   transactions: Transaction[];
   filteredTransactions: Transaction[];
+  rawTransactions: Transaction[];
+  filteredRawTransactions: Transaction[];
   selectedMonth: number;
   selectedYear: number;
   setSelectedMonth: (month: number) => void;
@@ -26,12 +28,14 @@ interface FinancialContextType {
   updateTransaction: (id: number, t: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: number) => Promise<void>;
   getSummary: () => FinancialSummary;
+  loadData: () => Promise<void>;
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
 
 export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [rawTransactions, setRawTransactions] = useState<Transaction[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -94,7 +98,55 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
       // Always fetch transactions
       const transactionsData = await apiService.getAllTransactions();
-      setTransactions(transactionsData);
+      // Only keep transactions that do not belong directly to a credit card invoice
+      const cashFlowTransactions = transactionsData.filter(t => !t.credit_card_id);
+
+      try {
+        const creditCards = await apiService.request('/api/credit-cards');
+        const cardMap = creditCards.reduce((acc: any, c: any) => ({ ...acc, [c.id]: c.name }), {});
+
+        const creditTx = transactionsData.filter(t => t.credit_card_id);
+        const invoiceGroups: { [key: string]: number } = {};
+        const invoiceDates: { [key: string]: string } = {};
+
+        creditTx.forEach(t => {
+          if (!t.invoice_date) return;
+          const invoiceMonthKey = t.invoice_date.substring(0, 7); // YYYY-MM
+          const key = `${t.credit_card_id}-${invoiceMonthKey}`;
+          if (!invoiceGroups[key]) {
+            invoiceGroups[key] = 0;
+            invoiceDates[key] = t.invoice_date;
+          }
+          invoiceGroups[key] += Number(t.amount);
+        });
+
+        let dummyIdCounter = -10000;
+        const invoiceTransactions: Transaction[] = Object.keys(invoiceGroups).map(key => {
+          const cardId = key.split('-')[0];
+          const cardName = cardMap[cardId] || `Cartão`;
+          dummyIdCounter--;
+          return {
+            id: dummyIdCounter,
+            user_id: targetUser?.id || 0,
+            description: `Fatura ${cardName}`,
+            amount: Number(invoiceGroups[key].toFixed(2)),
+            type: TransactionType.VARIABLE_EXPENSE,
+            category: 'Cartão de Crédito',
+            date: invoiceDates[key],
+            payment_method: 'CREDITO',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as Transaction;
+        });
+
+        const allCombined = [...cashFlowTransactions, ...invoiceTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setTransactions(allCombined);
+      } catch (e) {
+        console.error("Failed to process credit card invoices for dashboard", e);
+        setTransactions(cashFlowTransactions);
+      }
+
+      setRawTransactions(transactionsData);
 
       // Only fetch users if admin
       if (isAdmin) {
@@ -109,6 +161,10 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
   const filteredTransactions = useMemo(() => {
     return getTransactionsForMonth(transactions, selectedYear, selectedMonth);
   }, [transactions, selectedMonth, selectedYear]);
+
+  const filteredRawTransactions = useMemo(() => {
+    return getTransactionsForMonth(rawTransactions, selectedYear, selectedMonth);
+  }, [rawTransactions, selectedMonth, selectedYear]);
 
 
   const login = async (email: string, password: string) => {
@@ -201,8 +257,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const addTransaction = async (t: Omit<Transaction, 'id'>) => {
     try {
-      const newTransaction = await apiService.createTransaction(t);
-      setTransactions(prev => [newTransaction, ...prev]);
+      await apiService.createTransaction(t);
+      await loadData();
     } catch (error) {
       console.error('Error adding transaction:', error);
       throw error;
@@ -211,8 +267,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const updateTransaction = async (id: number, updates: Partial<Transaction>) => {
     try {
-      const updatedTransaction = await apiService.updateTransaction(id, updates);
-      setTransactions(prev => prev.map(t => t.id === id ? updatedTransaction : t));
+      await apiService.updateTransaction(id, updates);
+      await loadData();
     } catch (error) {
       console.error('Error updating transaction:', error);
       throw error;
@@ -222,7 +278,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
   const deleteTransaction = async (id: number) => {
     try {
       await apiService.deleteTransaction(id);
-      setTransactions(prev => prev.filter(t => t.id !== id));
+      await loadData();
     } catch (error) {
       console.error('Error deleting transaction:', error);
       throw error;
@@ -271,6 +327,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     <FinancialContext.Provider value={{
       transactions,
       filteredTransactions,
+      rawTransactions,
+      filteredRawTransactions,
       selectedMonth,
       selectedYear,
       setSelectedMonth,
@@ -290,7 +348,8 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       addTransaction,
       updateTransaction,
       deleteTransaction,
-      getSummary
+      getSummary,
+      loadData
     }}>
       {children}
     </FinancialContext.Provider>

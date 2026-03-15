@@ -86,7 +86,7 @@ export const TransactionBlock: React.FC<TransactionBlockProps> = ({ title, filte
           </span>
           <Button
             size="sm"
-            variant="outline"
+            variant="ghost"
             onClick={handleAddClick}
             className={`bg-white border-${baseColor}-200 text-${baseColor}-700 hover:bg-${baseColor}-50 hover:text-${baseColor}-900 hover:border-${baseColor}-300`}
           >
