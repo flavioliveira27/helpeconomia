@@ -14,6 +14,8 @@ export const CardDetails: React.FC = () => {
     const [invoices, setInvoices] = useState<CardInvoiceSummary[]>([]);
     const [selectedInvoice, setSelectedInvoice] = useState<CardInvoiceSummary | null>(null);
     const [invoiceDetails, setInvoiceDetails] = useState<CardInvoiceDetail | null>(null);
+    const currentYear = new Date().getFullYear();
+    const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set([currentYear]));
 
     const [isLoading, setIsLoading] = useState(true);
     const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
@@ -27,6 +29,7 @@ export const CardDetails: React.FC = () => {
     const [txCategory, setTxCategory] = useState('');
     const [txImportance, setTxImportance] = useState<TransactionImportance>(TransactionImportance.ESSENTIAL);
     const [txInstallments, setTxInstallments] = useState(1);
+    const [txRecurring, setTxRecurring] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const CATEGORIES = [
@@ -102,7 +105,8 @@ export const CardDetails: React.FC = () => {
                     date: txDate,
                     category: txCategory || 'Outros',
                     importance: txImportance as any,
-                    installments: txInstallments
+                    installments: txInstallments,
+                    recurring: txRecurring
                 });
             }
             setIsAddTxModalOpen(false);
@@ -126,6 +130,7 @@ export const CardDetails: React.FC = () => {
         setTxCategory('');
         setTxImportance(TransactionImportance.ESSENTIAL);
         setTxInstallments(1);
+        setTxRecurring(false);
         setEditingTxId(null);
     };
 
@@ -205,34 +210,89 @@ export const CardDetails: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
                 {/* Invoice Months Sidebar */}
-                <div className="lg:col-span-1 space-y-2">
+                <div className="lg:col-span-1">
                     <h3 className="font-bold text-lg mb-4 px-2">Faturas</h3>
                     {invoices.length === 0 ? (
                         <div className="text-slate-500 text-sm px-2">Nenhuma fatura lançada.</div>
-                    ) : (
-                        invoices.map((inv) => (
-                            <button
-                                key={inv.month_year}
-                                onClick={() => loadInvoiceDetails(card.id, inv)}
-                                className={`w-full text-left p-4 rounded-xl transition-all flex justify-between items-center group
-                  ${selectedInvoice?.month_year === inv.month_year
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 border border-slate-100 dark:border-slate-800'
-                                    }`}
-                            >
-                                <div>
-                                    <p className="font-bold capitalize">{getMonthName(inv.month)}</p>
-                                    <p className={`text-xs ${selectedInvoice?.month_year === inv.month_year ? 'text-blue-100' : 'text-slate-500'}`}>
-                                        Venc: {formatShortDate(inv.invoice_date)}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold">{formatCurrency(inv.total_amount)}</p>
-                                    {/* This could be extended with status: Aberta/Fechada */}
-                                </div>
-                            </button>
-                        ))
-                    )}
+                    ) : (() => {
+                        // Group invoices by year
+                        const byYear = invoices.reduce<Record<number, CardInvoiceSummary[]>>((acc, inv) => {
+                            const y = Number(inv.year);
+                            if (!acc[y]) acc[y] = [];
+                            acc[y].push(inv);
+                            return acc;
+                        }, {});
+                        const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+
+                        const toggleYear = (year: number) => {
+                            setExpandedYears(prev => {
+                                const next = new Set(prev);
+                                next.has(year) ? next.delete(year) : next.add(year);
+                                return next;
+                            });
+                        };
+
+                        return (
+                            <div className="space-y-3">
+                                {years.map(year => {
+                                    const yearInvoices = byYear[year];
+                                    const isExpanded = expandedYears.has(year);
+                                    const yearTotal = yearInvoices.reduce((sum, inv) => sum + Number(inv.total_amount), 0);
+
+                                    return (
+                                        <div key={year} className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                            {/* Year Header */}
+                                            <button
+                                                onClick={() => toggleYear(year)}
+                                                className="w-full flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className="material-icons-round text-slate-500 dark:text-slate-400 transition-transform duration-300"
+                                                        style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                                                    >
+                                                        expand_more
+                                                    </span>
+                                                    <span className="font-bold text-slate-700 dark:text-slate-200">{year}</span>
+                                                </div>
+                                                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                                                    {formatCurrency(yearTotal)}
+                                                </span>
+                                            </button>
+
+                                            {/* Month Buttons */}
+                                            <div
+                                                className="overflow-hidden transition-all duration-300 ease-in-out"
+                                                style={{ maxHeight: isExpanded ? `${yearInvoices.length * 80}px` : '0px' }}
+                                            >
+                                                <div className="space-y-1 p-1">
+                                                    {yearInvoices.map(inv => (
+                                                        <button
+                                                            key={inv.month_year}
+                                                            onClick={() => loadInvoiceDetails(card.id, inv)}
+                                                            className={`w-full text-left px-4 py-3 rounded-lg transition-all flex justify-between items-center
+                                                                ${selectedInvoice?.month_year === inv.month_year
+                                                                    ? 'bg-primary text-white shadow-md'
+                                                                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                                                }`}
+                                                        >
+                                                            <div>
+                                                                <p className="font-bold capitalize">{getMonthName(inv.month)}</p>
+                                                                <p className={`text-xs ${selectedInvoice?.month_year === inv.month_year ? 'text-blue-100' : 'text-slate-500'}`}>
+                                                                    Venc: {formatShortDate(inv.invoice_date)}
+                                                                </p>
+                                                            </div>
+                                                            <p className="font-semibold text-sm">{formatCurrency(inv.total_amount)}</p>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Invoice Details */}
@@ -274,6 +334,12 @@ export const CardDetails: React.FC = () => {
                                                         <span>{formatShortDate(tx.date)}</span>
                                                         <span>•</span>
                                                         <span>{tx.category}</span>
+                                                        {Boolean(tx.recurring) && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span className="font-medium text-emerald-500">RECORRENTE</span>
+                                                            </>
+                                                        )}
                                                         {tx.importance && (
                                                             <>
                                                                 <span>•</span>
@@ -448,6 +514,22 @@ export const CardDetails: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Recurring checkbox — same pattern as TransactionModal */}
+                                {!editingTxId && (
+                                    <div
+                                        className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
+                                        onClick={() => setTxRecurring(prev => !prev)}
+                                    >
+                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${txRecurring ? 'bg-primary border-primary' : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-500'}`}>
+                                            {txRecurring && <span className="material-icons-round text-white text-sm">check</span>}
+                                        </div>
+                                        <input type="checkbox" className="hidden" checked={txRecurring} readOnly />
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer select-none flex-1">
+                                            Repetir mensalmente? (Despesa Recorrente)
+                                        </label>
+                                    </div>
+                                )}
 
                                 <div className="pt-4 flex gap-3">
                                     <button

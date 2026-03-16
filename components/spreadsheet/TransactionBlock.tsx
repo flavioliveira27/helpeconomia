@@ -104,7 +104,6 @@ export const TransactionBlock: React.FC<TransactionBlockProps> = ({ title, filte
               <th className="px-5 py-3 w-32">Categoria</th>
               {showExtraColumns && <th className="px-5 py-3 w-48">Forma de Pagto</th>}
               {showExtraColumns && <th className="px-5 py-3 w-32">Importância</th>}
-              {showExtraColumns && <th className="px-5 py-3 text-right w-32">Valor Parcela</th>}
               <th className="px-5 py-3 text-right w-36 whitespace-nowrap">Valor Total</th>
               <th className="px-5 py-3 w-16"></th>
             </tr>
@@ -139,13 +138,7 @@ export const TransactionBlock: React.FC<TransactionBlockProps> = ({ title, filte
                       </span>
                     </td>
                   )}
-                  {showExtraColumns && (
-                    <td className="px-5 py-4 text-right font-mono text-slate-600">
-                      {t.paymentMethod === TransactionPaymentMethod.CREDIT_INSTALLMENTS
-                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(t.amount))
-                        : '-'}
-                    </td>
-                  )}
+
                   <td className="px-5 py-4 text-right font-bold text-slate-900 font-mono tracking-tight whitespace-nowrap">
                     {/* Show original amount (total) if it exists, otherwise the current amount (which relates to 'amount' in context for non-installments) */}
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(t.originalAmount ?? t.amount))}

@@ -74,14 +74,23 @@ router.get('/:month/:year', authMiddleware, checkCardOwnership, async (req, res)
     }
 });
 
+// Parse a 'YYYY-MM-DD' string without timezone conversion.
+// Using new Date('YYYY-MM-DD') interprets the string as UTC midnight,
+// which causes off-by-one day errors in servers running UTC (e.g. production).
+const parseLocalDate = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return { year, month: month - 1, day }; // month is 0-indexed
+};
+
 // Calculate the invoice date based on purchase date and card closing day
 const calculateInvoiceDate = (purchaseDateStr, closingDay, dueDay) => {
-    const purchaseDate = new Date(purchaseDateStr);
-    let invoiceMonth = purchaseDate.getMonth();
-    let invoiceYear = purchaseDate.getFullYear();
+    const { year, month, day } = parseLocalDate(purchaseDateStr);
+
+    let invoiceMonth = month;
+    let invoiceYear = year;
 
     // Se a compra foi feita no dia de fechamento ou depois, vai para a próxima fatura
-    if (purchaseDate.getDate() >= closingDay) {
+    if (day >= closingDay) {
         invoiceMonth++;
         if (invoiceMonth > 11) {
             invoiceMonth = 0;
@@ -89,14 +98,15 @@ const calculateInvoiceDate = (purchaseDateStr, closingDay, dueDay) => {
         }
     }
 
-    // Data base da fatura é o dia de vencimento daquele mês
-    return new Date(invoiceYear, invoiceMonth, dueDay);
+    // Retorna a data formatada diretamente, sem new Date() para evitar timezone
+    const m = invoiceMonth + 1; // back to 1-indexed
+    return `${invoiceYear}-${String(m).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
 };
 
 // Add a transaction to the credit card
 router.post('/transactions', authMiddleware, checkCardOwnership, async (req, res) => {
     const { cardId } = req.params;
-    const { description, amount, category, date, importance, installments = 1, observation = '' } = req.body;
+    const { description, amount, category, date, importance, installments = 1, observation = '', recurring = false } = req.body;
     const card = req.creditCard;
 
     if (!description || !amount || !category || !date) {
@@ -107,43 +117,80 @@ router.post('/transactions', authMiddleware, checkCardOwnership, async (req, res
     try {
         await conn.beginTransaction();
 
-        const basePurchaseDate = new Date(date);
+        const { year: baseYear, month: baseMonth, day: baseDay } = parseLocalDate(date);
         const transactionsToInsert = [];
 
-        for (let i = 0; i < installments; i++) {
-            // Calcula a data da compra original + i meses para determinar a fatura
-            const currentDateForCalc = new Date(basePurchaseDate);
-            currentDateForCalc.setMonth(basePurchaseDate.getMonth() + i);
+        // Calculate the first invoice date for the purchase
+        const firstInvoiceDateStr = calculateInvoiceDate(date, card.closing_day, card.due_day);
+        const firstInvoice = parseLocalDate(firstInvoiceDateStr);
+        // firstInvoice.month is 0-indexed
 
-            const invoiceDate = calculateInvoiceDate(currentDateForCalc, card.closing_day, card.due_day);
-            const formattedInvoiceDate = invoiceDate.toISOString().split('T')[0];
+        if (recurring && installments === 1) {
+            // Expand recurring: create one entry per month from the first invoice month until December of the same year
+            const endMonth = 11; // December (0-indexed)
+            const endYear = firstInvoice.year;
 
-            const installmentAmount = (amount / installments).toFixed(2);
-            let installmentDesc = description;
-            if (installments > 1) {
-                installmentDesc = `${description} (${i + 1}/${installments})`;
+            for (let m = firstInvoice.month; m <= endMonth; m++) {
+                // The invoice_date for each recurrence: same due_day, advancing month
+                const iYear = endYear;
+                const iMonth = m + 1; // 1-indexed
+                const invoiceDateStr = `${iYear}-${String(iMonth).padStart(2, '0')}-${String(card.due_day).padStart(2, '0')}`;
+
+                transactionsToInsert.push([
+                    req.user.id,
+                    description,
+                    Number(amount).toFixed(2),
+                    'VARIABLE_EXPENSE',
+                    category,
+                    date,
+                    observation,
+                    'CREDITO',
+                    importance || null,
+                    cardId,
+                    1,   // installments
+                    1,   // installment_number
+                    invoiceDateStr,
+                    1    // recurring
+                ]);
             }
+        } else {
+            // Original installment logic
+            for (let i = 0; i < installments; i++) {
+                let calcMonth = baseMonth + i; // 0-indexed
+                let calcYear = baseYear;
+                while (calcMonth > 11) { calcMonth -= 12; calcYear++; }
+                const calcDateStr = `${calcYear}-${String(calcMonth + 1).padStart(2, '0')}-${String(baseDay).padStart(2, '0')}`;
 
-            transactionsToInsert.push([
-                req.user.id,
-                installmentDesc,
-                installmentAmount,
-                'VARIABLE_EXPENSE', // Compra no crédito é tratada como despesa variável
-                category,
-                date, // Data original da compra
-                observation,
-                'CREDITO',
-                importance || null,
-                cardId,
-                installments,
-                i + 1,
-                formattedInvoiceDate
-            ]);
+                const formattedInvoiceDate = calculateInvoiceDate(calcDateStr, card.closing_day, card.due_day);
+
+                const installmentAmount = (amount / installments).toFixed(2);
+                let installmentDesc = description;
+                if (installments > 1) {
+                    installmentDesc = `${description} (${i + 1}/${installments})`;
+                }
+
+                transactionsToInsert.push([
+                    req.user.id,
+                    installmentDesc,
+                    installmentAmount,
+                    'VARIABLE_EXPENSE',
+                    category,
+                    date,
+                    observation,
+                    'CREDITO',
+                    importance || null,
+                    cardId,
+                    installments,
+                    i + 1,
+                    formattedInvoiceDate,
+                    recurring ? 1 : 0
+                ]);
+            }
         }
 
         const insertQuery = `
             INSERT INTO transactions 
-            (user_id, description, amount, type, category, date, observation, payment_method, importance, credit_card_id, installments, installment_number, invoice_date) 
+            (user_id, description, amount, type, category, date, observation, payment_method, importance, credit_card_id, installments, installment_number, invoice_date, recurring) 
             VALUES ?
         `;
 
