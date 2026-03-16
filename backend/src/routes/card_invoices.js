@@ -89,7 +89,7 @@ const calculateInvoiceDate = (purchaseDateStr, closingDay, dueDay) => {
     let invoiceMonth = month;
     let invoiceYear = year;
 
-    // Se a compra foi feita no dia de fechamento ou depois, vai para a próxima fatura
+    // Se a compra foi feita no dia de fechamento ou depois, ela cai no fechamento do próximo mês
     if (day >= closingDay) {
         invoiceMonth++;
         if (invoiceMonth > 11) {
@@ -98,9 +98,21 @@ const calculateInvoiceDate = (purchaseDateStr, closingDay, dueDay) => {
         }
     }
 
-    // Retorna a data formatada diretamente, sem new Date() para evitar timezone
-    const m = invoiceMonth + 1; // back to 1-indexed
-    return `${invoiceYear}-${String(m).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
+    // Calcula quando é o vencimento: se o dia de vencimento é menor que o de fechamento, o vencimento é no mês SEGUINTE ao fechamento
+    let dueMonth = invoiceMonth;
+    let dueYear = invoiceYear;
+
+    if (dueDay < closingDay) {
+        dueMonth++;
+        if (dueMonth > 11) {
+            dueMonth = 0;
+            dueYear++;
+        }
+    }
+
+    // Retorna a data formatada
+    const m = dueMonth + 1;
+    return `${dueYear}-${String(m).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
 };
 
 // Add a transaction to the credit card

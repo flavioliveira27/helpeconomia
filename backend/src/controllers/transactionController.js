@@ -103,16 +103,28 @@ export const updateTransaction = async (req, res) => {
                 const txMonth = parseInt(parts[1], 10) - 1; // 0-indexed month
                 const txDay = parseInt(parts[2], 10);
 
-                let invoiceMonth = txMonth + 1;
+                let invoiceMonth = txMonth;
                 let invoiceYear = txYear;
                 if (txDay >= card.closing_day) {
                     invoiceMonth += 1;
-                    if (invoiceMonth > 12) {
-                        invoiceMonth = 1;
+                    if (invoiceMonth > 11) {
+                        invoiceMonth = 0;
                         invoiceYear += 1;
                     }
                 }
-                const invoiceDateStr = `${invoiceYear}-${String(invoiceMonth).padStart(2, '0')}-${String(card.due_day).padStart(2, '0')}`;
+
+                let dueMonth = invoiceMonth;
+                let dueYear = invoiceYear;
+                if (card.due_day < card.closing_day) {
+                    dueMonth += 1;
+                    if (dueMonth > 11) {
+                        dueMonth = 0;
+                        dueYear += 1;
+                    }
+                }
+
+                const m = dueMonth + 1;
+                const invoiceDateStr = `${dueYear}-${String(m).padStart(2, '0')}-${String(card.due_day).padStart(2, '0')}`;
                 updates.push('invoice_date = ?');
                 values.push(invoiceDateStr);
             }
@@ -153,13 +165,13 @@ export const deleteTransaction = async (req, res) => {
 
         const targetTx = targetTxRows[0];
 
-        // If it's a credit card transaction with multiple installments, delete all of them
-        if (targetTx.credit_card_id && targetTx.installments && targetTx.installments > 1) {
+        // If it's a credit card transaction with multiple installments OR it's a recurring transaction, delete all associated entries
+        if (targetTx.credit_card_id && (targetTx.installments > 1 || targetTx.recurring)) {
             // Reconstruct the base description without the " (X/Y)" suffix
             // Using a more relaxed regex to catch variations
             const baseDescription = targetTx.description.replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
             
-            // Delete all transactions that match the heuristic criteria for this installment group
+            // Delete all transactions that match the heuristic criteria for this group
             // Removed 'amount' to avoid floating point division mismatch.
             const [result] = await db.query(
                 `DELETE FROM transactions 
@@ -167,11 +179,12 @@ export const deleteTransaction = async (req, res) => {
                  AND credit_card_id = ? 
                  AND date = ? 
                  AND installments = ? 
+                 AND recurring = ?
                  AND description LIKE ?`,
-                [userId, targetTx.credit_card_id, targetTx.orig_date, targetTx.installments, `${baseDescription}%`]
+                [userId, targetTx.credit_card_id, targetTx.orig_date, targetTx.installments, targetTx.recurring, `${baseDescription}%`]
             );
 
-            return res.json({ message: 'Todas as parcelas da transação foram excluídas com sucesso', deletedCount: result.affectedRows });
+            return res.json({ message: 'Lançamentos em lote (parcelados ou recorrentes) excluídos com sucesso', deletedCount: result.affectedRows });
         } else {
             // Standard single-transaction deletion
             const [result] = await db.query(
