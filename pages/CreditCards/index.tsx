@@ -103,10 +103,14 @@ export const CreditCards: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold">Meus Cartões</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Gerencie seus limites e faturas</p>
+                {/* Título + Botão sempre juntos */}
+                <div className="flex items-center gap-3">
+                    <div>
+                        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Meus Cartões</h1>
+                        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">Gerencie seus limites e faturas</p>
+                    </div>
                 </div>
+                {/* Ações à direita */}
                 <div className="flex items-center gap-3">
                     <HeaderActions />
                     <button
@@ -116,11 +120,13 @@ export const CreditCards: React.FC = () => {
                         <span className="material-icons-round">add</span>
                         <span className="hidden sm:inline">Adicionar Cartão</span>
                     </button>
-                    <MonthSelector 
-                        selectedMonth={selectedMonth} 
-                        selectedYear={selectedYear} 
-                        onMonthChange={setSelectedMonth} 
-                    />
+                    <div className="hidden lg:block">
+                        <MonthSelector 
+                            selectedMonth={selectedMonth} 
+                            selectedYear={selectedYear} 
+                            onMonthChange={setSelectedMonth} 
+                        />
+                    </div>
                 </div>
             </div>
 
