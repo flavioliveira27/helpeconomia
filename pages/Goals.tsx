@@ -4,7 +4,7 @@ import { useGoals } from '../contexts/GoalContext';
 import { GoalCard } from '../components/goals/GoalCard';
 import { GoalModal } from '../components/goals/GoalModal';
 import { DepositModal } from '../components/goals/DepositModal';
-import { ThemeToggle } from '../components/ThemeToggle';
+
 
 export const Goals: React.FC = () => {
     const { 
@@ -36,17 +36,17 @@ export const Goals: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Minhas Metas</h1>
-                <div className="flex items-center gap-3">
-                    <ThemeToggle isFixed={false} className="p-2" />
-                    <button
-                        onClick={() => setIsGoalModalOpen(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none"
-                    >
-                        <Target size={18} />
-                        Nova Meta
-                    </button>
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Minhas Metas</h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Acompanhe seu progresso</p>
                 </div>
+                <button
+                    onClick={() => setIsGoalModalOpen(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none"
+                >
+                    <Target size={18} />
+                    Nova Meta
+                </button>
             </div>
 
             {/* Summary Cards */}
