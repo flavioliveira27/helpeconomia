@@ -152,8 +152,7 @@ export const CardDetails: React.FC = () => {
     const limitPercent = Math.min(((card.limit_amount - availableLimit) / card.limit_amount) * 100, 100);
 
     const getMonthName = (monthNum: number) => {
-        const d = new Date();
-        d.setMonth(monthNum - 1);
+        const d = new Date(2024, monthNum - 1, 1);
         return d.toLocaleString('pt-BR', { month: 'long' });
     };
 
