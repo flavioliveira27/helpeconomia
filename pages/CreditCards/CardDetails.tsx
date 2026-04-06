@@ -53,12 +53,12 @@ export const CardDetails: React.FC = () => {
         setIsLoading(true);
         try {
             const summaries = await getInvoicesSummary(cardId);
-            
+
             if (summaries && summaries.length > 0) {
                 setInvoices(summaries);
                 // Tenta achar a fatura do mês atual global. Se achar, seleciona ela, senão pega a última (posição 0 do sort DESC da API).
                 const targetInvoice = summaries.find(s => Number(s.month) === (Number(selectedMonth) + 1) && Number(s.year) === Number(selectedYear));
-                
+
                 await loadInvoiceDetails(cardId, targetInvoice || summaries[0]);
             } else {
                 setInvoices([]);
@@ -88,20 +88,28 @@ export const CardDetails: React.FC = () => {
 
         setIsSubmitting(true);
         try {
+            const installmentValue = parseCurrencyInput(txAmount);
+            const totalAmountToSave = installmentValue * txInstallments;
+
             if (editingTxId) {
-                await updateTransaction(editingTxId, {
+                // A edição de parcelas ou compras no cartão afeta um grupo de múltiplas faturas.
+                // Ao invés de atualizar apenas o registro atual, deletamos o grupo (suportado nativamente no backend)
+                // e recriamos a despesa corretamente distribuída pelos meses.
+                await deleteTransaction(editingTxId);
+                await addCreditTransaction(card.id, {
                     description: txDesc,
-                    amount: parseCurrencyInput(txAmount),
+                    amount: totalAmountToSave,
                     date: txDate,
                     category: txCategory || 'Outros',
                     importance: txImportance as any,
-                    installments: txInstallments
+                    installments: txInstallments,
+                    recurring: txRecurring
                 });
             } else {
                 setTxImportance(TransactionImportance.ESSENTIAL);
                 await addCreditTransaction(card.id, {
                     description: txDesc,
-                    amount: parseCurrencyInput(txAmount),
+                    amount: totalAmountToSave,
                     date: txDate,
                     category: txCategory || 'Outros',
                     importance: txImportance as any,
@@ -364,12 +372,13 @@ export const CardDetails: React.FC = () => {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setEditingTxId(tx.id);
-                                                            setTxDesc(tx.description);
+                                                            setTxDesc(tx.description.replace(/\s*\(\d+\/\d+\)\s*$/, '').trim());
                                                             setTxAmount(formatCurrencyInput(Number(tx.amount)));
                                                             setTxDate(tx.date.substring(0, 10));
                                                             setTxCategory(tx.category);
                                                             setTxImportance(tx.importance || TransactionImportance.ESSENTIAL);
                                                             setTxInstallments(tx.installments || 1);
+                                                            setTxRecurring(Boolean(tx.recurring));
                                                             setIsAddTxModalOpen(true);
                                                         }}
                                                         className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors text-slate-500 hover:text-blue-500"
@@ -433,7 +442,34 @@ export const CardDetails: React.FC = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Valor Total (R$)</label>
+                                        <label className="block text-sm font-medium mb-1">Parcelas</label>
+                                        <div className="relative">
+                                            <select
+                                                value={txInstallments}
+                                                onChange={e => setTxInstallments(parseInt(e.target.value))}
+                                                className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value={1}>À vista</option>
+                                                {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
+                                                    <option key={n} value={n}>{n} vezes</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span className="material-icons-round text-slate-400">expand_more</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <label className="block text-sm font-medium">
+                                                {txInstallments > 1 ? 'Valor Parcela' : 'Valor (R$)'}
+                                            </label>
+                                            {txInstallments > 1 && txAmount && (
+                                                <span className="text-xs text-slate-500 font-medium">
+                                                    Total: {formatCurrency(parseCurrencyInput(txAmount) * txInstallments)}
+                                                </span>
+                                            )}
+                                        </div>
                                         <input
                                             type="text"
                                             required
@@ -442,16 +478,6 @@ export const CardDetails: React.FC = () => {
                                             onFocus={(e) => e.target.select()}
                                             placeholder="R$ 0,00"
                                             className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Data da Compra</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={txDate}
-                                            onChange={e => setTxDate(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all [&::-webkit-calendar-picker-indicator]:dark:filter [&::-webkit-calendar-picker-indicator]:dark:invert"
                                         />
                                     </div>
                                 </div>
@@ -477,25 +503,17 @@ export const CardDetails: React.FC = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Parcelas</label>
-                                        <div className="relative">
-                                            <select
-                                                value={txInstallments}
-                                                onChange={e => setTxInstallments(parseInt(e.target.value))}
-                                                className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none cursor-pointer"
-                                            >
-                                                <option value={1}>À vista</option>
-                                                {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
-                                                    <option key={n} value={n}>{n} vezes</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                                <span className="material-icons-round text-slate-400">expand_more</span>
-                                            </div>
-                                        </div>
+                                        <label className="block text-sm font-medium mb-1">Data da Compra</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            value={txDate}
+                                            onChange={e => setTxDate(e.target.value)}
+                                            className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all [&::-webkit-calendar-picker-indicator]:dark:filter [&::-webkit-calendar-picker-indicator]:dark:invert"
+                                        />
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Importância</label>
                                     <div className="relative">
