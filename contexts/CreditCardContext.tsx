@@ -74,6 +74,7 @@ export const CreditCardProvider: React.FC<{ children: ReactNode }> = ({ children
                 method: 'DELETE',
             });
             setCreditCards(prev => prev.filter(card => card.id !== id));
+            await loadData();
         } catch (error) {
             console.error('Error deleting credit card:', error);
             throw error;
