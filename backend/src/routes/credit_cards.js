@@ -85,6 +85,8 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         if (existing.length === 0) return res.status(404).json({ error: 'Cartão não encontrado' });
         if (existing[0].user_id !== req.user.id) return res.status(403).json({ error: 'Sem permissão' });
 
+        // Delete all transactions linked to this card first (invoices/installments)
+        await db.query('DELETE FROM transactions WHERE credit_card_id = ?', [id]);
         await db.query('DELETE FROM credit_cards WHERE id = ?', [id]);
         res.json({ message: 'Cartão excluído com sucesso' });
     } catch (error) {
