@@ -144,22 +144,24 @@ export const TransactionBlock: React.FC<TransactionBlockProps> = ({ title, filte
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(t.originalAmount ?? t.amount))}
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleEditClick(t)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Editar"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteTransaction(t.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Excluir"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+                    {t.id >= 0 && (
+                      <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEditClick(t)}
+                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteTransaction(t.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
 
@@ -189,20 +191,22 @@ export const TransactionBlock: React.FC<TransactionBlockProps> = ({ title, filte
                           {t.category}
                         </span>
 
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleEditClick(t)}
-                            className="text-slate-400 hover:text-blue-600 p-1"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => deleteTransaction(t.id)}
-                            className="text-slate-400 hover:text-red-600 p-1"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                        {t.id >= 0 && (
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleEditClick(t)}
+                              className="text-slate-400 hover:text-blue-600 p-1"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => deleteTransaction(t.id)}
+                              className="text-slate-400 hover:text-red-600 p-1"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {showExtraColumns && (t.paymentMethod || t.importance) && (

@@ -90,6 +90,17 @@ export async function syncDatabase() {
             console.log('✅ All passwords migrated to bcrypt hashes');
         }
 
+        // 5. Clean up orphaned transactions from previously deleted credit cards
+        console.log('🧹 Checking for orphaned credit card transactions...');
+        const [orphanedResult] = await db.query(`
+            DELETE FROM transactions 
+            WHERE credit_card_id IS NOT NULL 
+              AND credit_card_id NOT IN (SELECT id FROM credit_cards)
+        `);
+        if (orphanedResult.affectedRows > 0) {
+            console.log(`✅ Cleaned up ${orphanedResult.affectedRows} orphaned transactions from deleted credit cards.`);
+        }
+
         console.log('✨ Database synchronization completed successfully');
     } catch (error) {
         console.error('❌ Database synchronization failed:', error);
