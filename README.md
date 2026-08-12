@@ -19,14 +19,6 @@ docker-compose up --build
 # Aguarde alguns segundos para o MySQL inicializar...
 ```
 
-### Acessar a Aplicação
-- **Frontend**: http://localhost:8001
-- **Backend API**: http://localhost:5001
-- **MySQL**: localhost:3306
-
-### Login
-- **Email**: fcso.oliveira@gmail.com
-- **Senha**: Castr0@2715
 
 ## 📦 Estrutura do Projeto
 
@@ -92,42 +84,6 @@ O sistema usa MySQL 8.0 com as seguintes tabelas:
 - **transactions**: Todas as transações financeiras
 
 Ver `backend/init.sql` para o schema completo.
-
-## 📖 Credenciais
-
-Ver arquivo `CREDENCIAIS.md` para todas as credenciais de acesso.
-
-## 🛠️ Comandos Úteis
-
-```bash
-# Parar todos os serviços
-docker-compose down
-
-# Ver logs
-docker-compose logs -f
-
-# Acessar o banco de dados
-docker exec -it finansmart_mysql mysql -u finansmart_user -p
-
-# Reconstruir tudo
-docker-compose down -v
-docker-compose up --build
-```
-
-## 📝 Notas de Desenvolvimento
-
-- O backend roda na porta 5001
-- O frontend roda na porta 8001
-- Os dados são persistidos no volume Docker `mysql_data`
-- Hot reload está habilitado no frontend
-
-## ⚠️ Avisos de Segurança
-
-> **IMPORTANTE**: Este projeto está configurado para desenvolvimento. Para produção:
-> - Use bcrypt para hash de senhas
-> - Configure HTTPS
-> - Use variáveis de ambiente seguras
-> - Configure firewall e restrições de rede
 
 ## 📄 Licença
 
